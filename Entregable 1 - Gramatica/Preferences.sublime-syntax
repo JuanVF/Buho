@@ -1,0 +1,57 @@
+%YAML 1.2
+---
+name: Buho
+file_extensions: [bh]
+scope: source.Buho
+
+contexts:
+  main:
+    - match: \b(funcion|inicio_funcion|final_funcion|recibe|devuelve|llamar)\b
+      scope: entity.name.function.c
+
+    - match: \b(escribir|recibir_entrada|con_comentario|sin_comentario|guardar_en|dormir|funcion|en|numero_llaves|numero_valores|acceder_en|obtener_largo|meter|sacar_en)\b
+      scope: keyword.control.c
+
+    - match: \b(tiene|mas|menos|por|entre|residuo|elevado|modulo)\b
+      scope: keyword.operator.arithmetic.c
+   
+    - match: \b(menor|mayor|menor_igual|mayor_igual|diferente|igual|y|o|no)\b
+      scope: keyword.operator.logical.c
+
+    - match: \b(si|inicio_si|final_si|sino|final_sino)\b
+      scope: keyword.control.conditional.c
+
+    - match: \b(mientras|inicia_mientras|final_mientras|desde|hasta|inicia_desde|final_desde)\b
+      scope: keyword.control.c
+
+    - match: \b(en|numero_llaves|numero_valores|acceder_en|obtener_largo|meter|sacar_en)\b
+      scope: markup.list.unnumbered.c
+
+    - match: \b(en|numero_llaves|numero_valores)\b
+      scope: markup.list.numbered.c
+
+    - match: \b(numerico|flotante|texto|bool|lista|mapa)\b
+      scope: storage.type.c
+
+    - match: \b(verdadero|falso)\b
+      scope: markup.bold.c
+
+    - match: '"'
+      push: string
+
+    - match: '//'
+      push: comment
+
+  comment:
+    - meta_scope: string.quoted.double.c
+    - match: \\.
+      scope: constant.character.escape.c
+    - match: '\n'
+      pop: true
+
+  string:
+    - meta_scope: markup.inserted.c
+    - match: \\.
+      scope: constant.character.escape.c
+    - match: '"'
+      pop: true
