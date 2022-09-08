@@ -1,0 +1,52 @@
+// Este un ejemplo donde creamos un usuario y hacemos un login sencillo
+mapa Usuarios de numerico a texto
+
+// Funcion para crear usuarios en un mapa
+funcion CrearUsuario recibe mapa Usuarios texto ComentarioID texto ComentarioNombre
+inicio_funcion
+
+  numerico ID tiene 0
+  texto Nombre tiene ""
+
+  recibir_entrada con_comentario ComentarioID guardar_en ID
+  recibir_entrada con_comentario ComentarioNombre guardar_en Nombre
+
+  Usuarios en ID tiene Nombre
+
+final_funcion
+
+// Aqui creamos los usuarios.
+CrearUsuario Usuarios "Escriba el ID del primer usuario" "Escriba la contraseña del primer usuario"
+CrearUsuario Usuarios "Escriba el ID del segundo usuario" "Escriba la contraseña del segundo usuario"
+CrearUsuario Usuarios "Escriba el ID del tercer usuario" "Escriba la contraseña del tercer usuario"
+
+// Vamos a hacer la funcion de login
+funcion PuedeIniciar recibe mapa Usuarios texto ID texto Contraseña inicio_funcion
+
+  texto Contra tiene Usuarios en ID
+  bool inicia tiene falso
+
+  si Contraseña igual Contra inicio_si
+    inicia tiene verdadero
+  final_si
+
+  devuelve inicia
+final_funcion
+
+// Recibimos los datos del usuario y lo comparamos con los datos del mapa
+numerico IDIniciar tiene 0
+texto ContrasenaIniciar tiene ""
+
+recibir_entrada con_comentario "Ingrese su ID: " guardar_en ID
+recibir_entrada con_comentario "Ingrese su Contra: " guardar_en ContrasenaIniciar
+
+bool inicia tiene llamar PuedeIniciar recibe Usuarios IDIniciar ContrasenaIniciar
+
+// Dependiendo el resultado mostramos un comentario u otro.
+si inicia igual verdadero inicio_si
+  escribir "Bienvenido Ma fella :)"
+final_si.
+
+si inicia igual falso inicio_si
+  escribir "Usuario o contraseña incorrectos"
+final_si
