@@ -36,22 +36,23 @@ contexts:
     - match: \b(verdadero|falso)\b
       scope: markup.bold.c
 
-    - match: '!'
+    - match: '"'
       push: string
 
     - match: '//'
       push: comment
+
+
+  string:
+    - meta_scope: markup.inserted.c
+    - match: \\.
+      scope: constant.character.escape.c
+    - match: '"'
+      pop: true
 
   comment:
     - meta_scope: string.quoted.double.c
     - match: \\.
       scope: constant.character.escape.c
     - match: '\n'
-      pop: true
-
-  string:
-    - meta_scope: markup.inserted.c
-    - match: \\.
-      scope: constant.character.escape.c
-    - match: '!'
       pop: true
