@@ -1,0 +1,7 @@
+funcion pseudo_aleatorio recibe numerico semilla inicio_funcion
+  numerico a tiene semilla por 15485863
+  devuelve a por a por a modulo 2038074743
+final_funcion
+
+numerico x tiene pseudo_aleatorio recibe numero_aleatorio de 0 a 1
+numerico z tiene pseudo_aleatorio recibe numero_aleatorio de 0 a 1
