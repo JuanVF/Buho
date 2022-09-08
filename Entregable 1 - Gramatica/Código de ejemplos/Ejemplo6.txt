@@ -1,0 +1,30 @@
+// Funciones con las operaciones aritméticas
+funcion suma recibe numerico x numerico z inicio_funcion  
+  devuelve x mas z
+final_funcion
+
+funcion resta recibe numerico x numerico z inicio_funcion  
+  devuelve x menos z
+final_funcion
+
+funcion multiplicacion recibe numerico x numerico z inicio_funcion  
+  devuelve x por z
+final_funcion
+
+funcion division recibe numerico x numerico z inicio_funcion 
+  si z igual 0 inicio_si
+    devuelve "infinito"
+  final_si
+  devuelve x entre z
+final_funcion
+
+funcion modulo recibe numerico x numerico z inicio_funcion
+  si z igual 0 inicio_si
+    devuelve "infinito"
+  final_si
+  devuelve x residuo z
+final_funcion
+
+funcion potencia recibe numerico x numerico z inicio_funcion  
+  devuelve x elevado z
+final_funcion
