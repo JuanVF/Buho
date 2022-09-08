@@ -1,7 +1,15 @@
-funcion pseudo_aleatorio recibe numerico semilla inicio_funcion
-  numerico a tiene semilla por 15485863
-  devuelve a por a por a modulo 2038074743
+funcion masAlejadoDeCero recibe numerico a numerico b inicio_funcion
+  aAbs tiene valor_absoluto a
+  bAbs tiene valor_absoluto b
+  si aAbs igual bAbs
+    inicio_si
+      escribir "Igualmente alejados de cero"
+      devuelve a b
+    final_si
+  sino si aAbs mayor bAbs
+    escribir "El primer numero está más alejado"
+    devuelve a
+  sino
+    escribir "El segundo numero está más alejado"
+    devuelve b
 final_funcion
-
-numerico x tiene pseudo_aleatorio recibe numero_aleatorio de 0 a 1
-numerico z tiene pseudo_aleatorio recibe numero_aleatorio de 0 a 1
