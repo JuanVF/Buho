@@ -1,0 +1,19 @@
+// Funcion Fizz Buzz
+funcion fizzBuzz recibe numerico n inicio_funcion
+  si n modulo 3 igual 0 inicio_si
+    si n modulo 5 igual 0 inicio_si
+      devuelve "FizzBuzz"
+    final_si
+    sino
+      devuelve "Fizz"
+    final_sino
+  final_si
+  sino
+    si n modulo 5 igual 0 inicio_si
+      devuelve "Buzz"
+    final_si
+    sino
+      devuelve n
+    final_sino
+  final_sino
+final_funcion
