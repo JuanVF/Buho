@@ -9,10 +9,10 @@ contexts:
     - match: \b(funcion|inicio_funcion|final_funcion|recibe|devuelve|llamar)\b
       scope: entity.name.function.c
 
-    - match: \b(escribir|recibir_entrada|con_comentario|sin_comentario|guardar_en|dormir|funcion|en|numero_llaves|numero_valores|acceder_en|obtener_largo|meter|sacar_en)\b
+    - match: \b(escribir|recibir_entrada|con_comentario|sin_comentario|guardar_en|dormir|numerico_aletorio|en|numero_llaves|numero_valores|acceder_en|obtener_largo|meter|sacar_en)\b
       scope: keyword.control.c
 
-    - match: \b(tiene|mas|menos|por|entre|residuo|elevado|modulo)\b
+    - match: \b(tiene|mas|menos|por|entre|residuo|elevado|modulo|valor_absoluto)\b
       scope: keyword.operator.arithmetic.c
    
     - match: \b(menor|mayor|menor_igual|mayor_igual|diferente|igual|y|o|no)\b
@@ -36,7 +36,7 @@ contexts:
     - match: \b(verdadero|falso)\b
       scope: markup.bold.c
 
-    - match: '"'
+    - match: '!'
       push: string
 
     - match: '//'
@@ -53,5 +53,5 @@ contexts:
     - meta_scope: markup.inserted.c
     - match: \\.
       scope: constant.character.escape.c
-    - match: '"'
+    - match: '!'
       pop: true
