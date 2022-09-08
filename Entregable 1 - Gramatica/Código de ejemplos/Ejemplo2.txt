@@ -1,0 +1,36 @@
+funcion recibirNombre inicio_funcion
+  texto nombre tiene ""
+  recibir_entrada con_comentario "digite el nombre" guardar_en nombre
+  devuelve nombre
+final_funcion
+
+funcion recibirEdad inicio_funcion
+  numerico edad tiene 0
+  recibir_entrada con_comentario "digite la edad" guardar_en edad
+  devuelve edad
+final_funcion
+
+numerico i tiene 0
+mapa grupo de texto a numerico
+
+mientras i menor_igual 10 inicia_mientras 
+  texto nombre tiene llamar recibirNombre
+  numerico edad tiene llamar recibirEdad
+  grupo en nombre tiene edad
+  i tiene i mas 1
+final_mientras
+
+i tiene 0
+numerico j tiene 0
+desde 0 hasta grupo numero_llaves inicia_desde
+  texto llave tiene grupo llaveen i
+  desde 0 hasta grupo numero_valores inicia_desde
+    escribir "El estudiante "
+    escribir llave
+    escribir " tiene la edad de "
+    escribir grupo en llave
+    escribir "años!"
+    j tiene j mas 1
+  final_desde
+  i tiene i mas 1
+final_desde
