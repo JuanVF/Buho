@@ -1,0 +1,20 @@
+funcion bubblesort recibe lista elements inicio_funcion
+    bool swapped tiene falso
+    numerico largolista tiene obtener_largo elements
+    numerico n tiene 0
+    numerico i tiene 0
+    desde n hasta largolista inicia_desde
+        desde i hasta n inicia_desde
+            si elements acceder_en i mayor elements acceder_en i mas 1 inicio_si
+                swapped tiene verdadero
+                elements acceder_en i tiene elements acceder_en i mas 1
+                elements acceder_en i mas 1 tiene elements acceder_en i
+            final_si
+            i tiene i mas 1
+        final_desde
+        n tiene n mas 1
+        si swapped igual falso inicio_si
+            devuelve elements
+        final_si
+    final_desde    
+final_funcion
