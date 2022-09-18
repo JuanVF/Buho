@@ -26,6 +26,7 @@ class TipoComponente(Enum):
     ESPERA = auto()
     VALOR_ABSOLUTO = auto()
     ALEATORIO = auto()
+    TIPO = auto()
     DECLARACION = auto()
     OPERADOR_ARITMETICO = auto()
     OPERADOR_LOGICO = auto()
@@ -79,7 +80,8 @@ class Explorador:
                         (TipoComponente.ESPERA, r'^(dormir)'),
                         (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto)'),
                         (TipoComponente.ALEATORIO, r'^(numerico_aletorio|de|a)'),
-                        (TipoComponente.DECLARACION, r'^(numerico|flotante|texto|bool|tiene)'),
+                        (TipoComponente.TIPO, r'^(numerico|flotante|texto|bool)'),
+                        (TipoComponente.DECLARACION, r'^(tiene)'),
                         (TipoComponente.OPERADOR_ARITMETICO, r'^(mas|menos|por|entre|residuo|elevado|modulo)'),
                         (TipoComponente.OPERADOR_LOGICO, r'^(menor|mayor|menor_igual|mayor_igual|diferente|igual|y|o)'),
                         (TipoComponente.TEXTO, r'^(~.?[^~]*)~'),
