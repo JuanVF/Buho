@@ -70,25 +70,26 @@ class Explorador:
         - Un string de regex que describe los textos que son generados para
           ese componente
     """
-    regex_componentes = [ (TipoComponente.COMENTARIO, r'^//:.*'),
-                                 (TipoComponente.PALABRA_CLAVE, r'^(| “funcion” | “inicio_funcion” | “final_funcion” | “recibe” | “devuelve”)'),
-                                 (TipoComponente.ESCRITURA, r'^(“escribir”)'),
-                                 (TipoComponente.RECIBIMIENTO, r'^(“recibir_entrada” | “guardar_en” | “con_comentario” | “sin_comentario” | “guardar_en”)'),
-                                 (TipoComponente.CONDICIONAL, r'^(si | inicio_si | final_si | sino | final_sino)'),
-                                 (TipoComponente.REPETICION, r'^(“mientras” | “inicia_mientras” | “final_mientas” | “desde” | “hasta” | “inicia_desde” | “final_desde”)'),
-                                 (TipoComponente.ESPERA, r'^(“dormir”)'),
-                                 (TipoComponente.VALOR_ABSOLUTO, r'^(“valor_absoluto”)'),
-                                 (TipoComponente.ALEATORIO, r'^("numerico_aletorio" | “de” | “a”)'),
-                                 (TipoComponente.DECLARACION, r'^("numerico" | "flotante" | "texto" | "bool" | "tiene” )'),
-                                 (TipoComponente.OPERADOR_ARITMETICO, r'^("mas" | "menos" | "por" | "entre" | "residuo" | "elevado" | "modulo")'),
-                                 (TipoComponente.OPERADOR_LOGICO, r'^("menor" | "mayor" | "menor_igual" | "mayor_igual" | "diferente" | "igual" | "y" | "o")'),
-                                 (TipoComponente.TEXTO, r'^(~.?[^~]*)~'),
-                                 (TipoComponente.IDENTIFICADOR, r'^([a-z])'),
-                                 (TipoComponente.NUMERO, r'^(-?[0-9]+)'),
-                                 (TipoComponente.FLOTANTE, r'^(-?[0-9]+\.[0-9]+)'),
-                                 (TipoComponente.BOOLEANO, r'^(verdadero|falso)'),
-                                 (TipoComponente.PUNTUACION, r'^([\n /)'),
-                                 (TipoComponente.BLANCOS, r'^(\s)*')]
+    regex_componentes=[ (TipoComponente.COMENTARIO, r'^//:.*'),
+                        (TipoComponente.PALABRA_CLAVE, r'^(funcion|inicio_funcion|final_funcion|recibe|devuelve)'),
+                        (TipoComponente.ESCRITURA, r'^(escribir)'),
+                        (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada|guardar_en|con_comentario|sin_comentario|guardar_en)'),
+                        (TipoComponente.CONDICIONAL, r'^(si|inicio_si|final_si|sino|final_sino)'),
+                        (TipoComponente.REPETICION, r'^(mientras|inicia_mientras|final_mientas|desde|hasta|inicia_desde|final_desde)'),
+                        (TipoComponente.ESPERA, r'^(dormir)'),
+                        (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto)'),
+                        (TipoComponente.ALEATORIO, r'^("numerico_aletorio"|de|a)'),
+                        (TipoComponente.DECLARACION, r'^("numerico"|"flotante"|"texto"|"bool"|"tiene)'),
+                        (TipoComponente.OPERADOR_ARITMETICO, r'^("mas"|"menos"|"por"|"entre"|"residuo"|"elevado"|"modulo")'),
+                        (TipoComponente.OPERADOR_LOGICO, r'^("menor"|"mayor"|"menor_igual"|"mayor_igual"|"diferente"|"igual"|"y"|"o")'),
+                        (TipoComponente.TEXTO, r'^(~.?[^~]*)~'),
+                        (TipoComponente.IDENTIFICADOR, r'^([a-z]([a-zA-z0-9])*)'),
+                        (TipoComponente.NUMERO, r'^(-?[0-9]+)'),
+                        (TipoComponente.FLOTANTE, r'^(-?[0-9]+\.[0-9]+)'),
+                        (TipoComponente.BOOLEANO, r'^(verdadero|falso)'),
+                        (TipoComponente.PUNTUACION, r'^([\n/)'),
+                        (TipoComponente.BLANCOS, r'^(\s)*')]
+
 
 
     def __init__(self, contenido_archivo):
