@@ -153,7 +153,7 @@ class Explorador:
 
 # Tests
 if __name__ == '__main__':
-    linea_ejemplo = "funcion bubblesort recibe lista elements inicio_funcion"
+    linea_ejemplo = "funcion es_par recibe numerico numero inicio_funcion"
 
     explorador = Explorador(linea_ejemplo)
 
