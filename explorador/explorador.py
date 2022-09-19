@@ -26,7 +26,6 @@ class TipoComponente(Enum):
     ESPERA = auto()
     VALOR_ABSOLUTO = auto()
     ALEATORIO = auto()
-    TIPO = auto()
     DECLARACION = auto()
     OPERADOR_ARITMETICO = auto()
     OPERADOR_LOGICO = auto()
@@ -45,10 +44,14 @@ class ComponenteLéxico:
 
     tipo    : TipoComponente
     texto   : str
+    columna : int
+    fila    : int
 
-    def __init__(self, tipo_nuevo: TipoComponente, texto_nuevo: str):
+    def __init__(self, tipo_nuevo: TipoComponente, texto_nuevo: str, columna_nueva: int, fila_nueva: int):
         self.tipo = tipo_nuevo
         self.texto = texto_nuevo
+        self.columna = columna_nueva
+        self.fila = fila_nueva
 
     def __str__(self):
         """
@@ -57,7 +60,7 @@ class ComponenteLéxico:
         google)
         """
 
-        resultado = f'{self.tipo:30} <{self.texto}>'
+        resultado = f'{self.tipo:30} <{self.texto}> en {self.fila}:{self.columna}'
         return resultado
 
 class Explorador:
@@ -107,8 +110,8 @@ class Explorador:
         Esta clase no esta manejando errores de ningún tipo
         """
 
-        for linea in self.texto:
-            resultado = self.procesar_linea(linea)
+        for linea, index in self.texto:
+            resultado = self.procesar_linea(linea, index + 1)
             self.componentes = self.componentes + resultado
 
     def imprimir_componentes(self):
@@ -123,11 +126,13 @@ class Explorador:
 
 
 
-    def procesar_linea(self, linea):
+    def procesar_linea(self, linea, index):
         """
         Se encarga de obtener cada componente lexico de una linea del codigo
         """
         componentes = []
+
+        linea_original = linea
 
         while linea != "":
             for tipo, patron in self.regex_componentes:
@@ -137,7 +142,9 @@ class Explorador:
                     continue
 
                 if not self.es_ignorable(tipo):
-                    nuevo_componente = ComponenteLéxico(tipo, coincidencia.group())
+                    token = coincidencia.group(0)
+                    coincidencia_original = re.search(token, linea_original)
+                    nuevo_componente = ComponenteLéxico(tipo, token, coincidencia_original.end(),index)
 
                     componentes.append(nuevo_componente)
 
@@ -160,7 +167,7 @@ if __name__ == '__main__':
     explorador = Explorador(linea_ejemplo)
 
     # Test para procesar una linea
-    componentes = explorador.procesar_linea(linea_ejemplo)
+    componentes = explorador.procesar_linea(linea_ejemplo, 1)
 
     print("Componentes de la linea:")
     print(linea_ejemplo)
