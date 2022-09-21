@@ -1,7 +1,20 @@
-# Explorador para el lenguaje Ciruelas (scanner)
+# Explorador para el lenguaje Buho
 from enum import Enum, auto
 
 import re
+
+class BuhoSyntaxError(Exception):
+    """Base class for other exceptions"""
+    pass
+
+
+class tokenIncorrecto(BuhoSyntaxError):
+    def __init__(self, texto: str, linea: int, indice: int, mensaje = " posee un error de sintaxis"):
+        self.texto = texto
+        self.linea = linea
+        self.indice = indice
+        self.mensaje = mensaje 
+        super().__init__("El componente " + self.texto + " ubicado en la linea " + str(self.linea) + " en el indice " + str(self.indice) + self.mensaje )
 
 class TipoComponente(Enum):
     """
@@ -93,7 +106,7 @@ class Explorador:
                         (TipoComponente.FLOTANTE, r'^(-?[0-9]+\.[0-9]+)'),
                         (TipoComponente.BOOLEANO, r'^(verdadero|falso)'),
                         (TipoComponente.PUNTUACION, r'^(\n)'),
-                        (TipoComponente.BLANCOS, r'^(\s)*')]
+                        (TipoComponente.BLANCOS, r'^(\s)+')]
 
 
 
@@ -130,8 +143,11 @@ class Explorador:
         """
 
         for linea, index in self.texto:
-            resultado = self.procesar_linea(linea, index + 1)
-            self.componentes = self.componentes + resultado
+            try:
+                resultado = self.procesar_linea(linea, index + 1)
+                self.componentes = self.componentes + resultado
+            except tokenIncorrecto as e:
+                print(e)
 
     def imprimir_componentes(self):
         """
@@ -154,20 +170,48 @@ class Explorador:
         linea_original = linea
 
         while linea != "":
+            valido = True
             for tipo, patron in self.regex_componentes:
                 coincidencia = re.search(patron, linea)
 
-                if coincidencia is None:
-                    continue
-
-                if not self.es_ignorable(tipo):
-                    token = coincidencia.group(0)
+                if coincidencia is not None:
+                    if not self.es_ignorable(tipo):
+                        token = coincidencia.group(0)
+                        coincidencia_original = re.search(token, linea_original)
+                        nuevo_componente = ComponenteLéxico(tipo, token, coincidencia_original.end(),index)
+                        componentes.append(nuevo_componente)
+                    
+                    valido = False
+                    linea = linea[coincidencia.end():]
+                    break
+            if valido:
+                # Opcion 1, seleccionar el token equivocado y continuar con la llinea
+                """# este token es el ultimo de la linea
+                if linea.find(" ") == -1:
+                    token = linea
                     coincidencia_original = re.search(token, linea_original)
-                    nuevo_componente = ComponenteLéxico(tipo, token, coincidencia_original.end(),index)
-
+                    
+                    # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
+                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, coincidencia_original.end(),index)
                     componentes.append(nuevo_componente)
+                    break
+                else:
+                    token = linea[0:linea.find(" ")]
+                    coincidencia_original = re.search(token, linea_original)
+                    # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
+                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, coincidencia_original.end(),index)
+                    componentes.append(nuevo_componente)
+                    #continua la exploracion
+                    linea = linea[linea.find(" "):]"""
 
-                linea = linea[coincidencia.end():]
+                # Opcion 2, dejar de leer la linea y levantar la excepcion
+                if linea.find(" ") == -1:
+                    if linea.find("\n") == -1:
+                        raise tokenIncorrecto(linea, index, re.search(token, linea_original).end())
+                    else:
+                        raise tokenIncorrecto(linea[0:linea.find("\n")], index, re.search(token, linea_original).end())
+                else:
+                    raise tokenIncorrecto(linea[0:linea.find(" ")], index, re.search(token, linea_original).end())
 
         return componentes
 
