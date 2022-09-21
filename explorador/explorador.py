@@ -101,6 +101,25 @@ class Explorador:
         self.texto = contenido_archivo
         self.componentes = []
 
+    # Opción 1, retornando las líneas como lista
+    # archivo = open("nombre_archivo.ext")
+    # lineas = archivo.readlines() # Almacena las líneas del archivo en una lista 
+    # archivo.close()    
+    # return lineas
+ 
+
+    # Opción 2, invocando  el procesamiento / lectura de línea por línea
+    # archivo = open("nombre_archivo.ext",'r')
+    # while True:
+    #    siguiente_linea = archivo.readline()
+
+    #    if not siguiente_linea:
+    #       break
+    #    ***método para leer/procesar línea*** siguiente_linea.strip()
+
+    # archivo.close()
+
+    
     def explorar(self):
         """
         Itera sobre cada una de las líneas y las va procesando de forma que
