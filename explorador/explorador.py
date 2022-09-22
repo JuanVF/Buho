@@ -1,12 +1,60 @@
+# Explorador para el lenguaje Buho
+
 from tkinter import * 
 from tkinter.ttk import *
 from tkinter.filedialog import askopenfile
-
-# Explorador para el lenguaje Buho
 from enum import Enum, auto
 
-
 import re
+
+"""
+Manejador de errores.
+Se setea el número de línea desde el main. Tiene que llamar setlineaStr(numlinea) desde la funcion que lleva el contador de linea del codigo
+Recibe: lista de ComponenteLéxico "componentes".
+Si encuentra un tipo de componente "ERROR", imprime el error.
+"""
+class ManejadorErrores:
+
+
+    def __init__(self):
+        self.lineaStr = "En la línea número "
+        self.columnaStr = "En la columna "
+        self.componenteStr = "En el componente " 
+        self.error : str
+        self.msjAdicional : str
+
+
+
+    def setlineaStr(self,numlinea):
+        self.lineaStr = self.lineaStr + str(numlinea) + ". "
+
+    def setcolumnaStr(self,numcolumna):
+        self.columnaStr = self.columnaStr + str(numcolumna) + ". "
+    
+    def setcomponenteStr(self,numcomponente):
+        self.componenteStr = self.componenteStr + str(numcomponente) + ". "
+
+    def getMensajeError(self):
+        msj = self.error + """
+        ******************************************** Error encontrado ****************************************************** 
+        \tUbicado en : """ + self.lineaStr + self.columnaStr + self.componenteStr + """\n\t\t...""" + self.msjAdicional + "..." + """        
+        ********************************************************************************************************************
+        """
+        return msj
+
+    def imprimir_error_Str(self,componente):
+        self.error = "...Error de escritura de componente detectado:"
+        self.msjAdicional = str(componente) + " mal escrito."
+
+        print(self.getMensajeError())
+    
+#son solo errores de saber si esta bien o mal escrito
+    def manejar_errores(self,componentes):
+        for componente in componentes:
+            if (componente.tipo == TipoComponente.ERROR):
+                self.setcolumnaStr(componente.columna)
+                self.setcomponenteStr(componente.texto)
+                self.imprimir_error_Str(componente)
 
 
 class TipoComponente(Enum):
@@ -80,20 +128,23 @@ class Explorador:
         - Un string de regex que describe los textos que son generados para
           ese componente
     """
+
+    manejadorErrores = ManejadorErrores()
+
     regex_componentes=[ (TipoComponente.COMENTARIO, r'^//.*'),
-                        (TipoComponente.PALABRA_CLAVE, r'^(funcion|inicio_funcion|final_funcion|recibe|devuelve)'),
-                        (TipoComponente.ESCRITURA, r'^(escribir)'),
-                        (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada|guardar_en|con_comentario|sin_comentario|guardar_en)'),
-                        (TipoComponente.CONDICIONAL, r'^(si|inicio_si|final_si|sino|final_sino)'),
-                        (TipoComponente.REPETICION, r'^(mientras|inicia_mientras|final_mientas|desde|hasta|inicia_desde|final_desde)'),
-                        (TipoComponente.ESPERA, r'^(dormir)'),
-                        (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto)'),
-                        (TipoComponente.ALEATORIO, r'^(numerico_aletorio|de|a)'),
-                        (TipoComponente.TIPO, r'^(numerico|flotante|texto|bool)'),
-                        (TipoComponente.DECLARACION, r'^(tiene)'),
-                        (TipoComponente.OPERADOR_ARITMETICO, r'^(mas|menos|por|entre|residuo|elevado|modulo)'),
-                        (TipoComponente.OPERADOR_LOGICO, r'^(menor|mayor|menor_igual|mayor_igual|diferente|igual|y|o)'),
-                        (TipoComponente.TEXTO, r'^(~.?[^~]*)~'),
+                        (TipoComponente.PALABRA_CLAVE, r'^(funcion |inicio_funcion |final_funcion|recibe |devuelve)'),
+                        (TipoComponente.ESCRITURA, r'^(escribir )'),
+                        (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada |guardar_en |con_comentario |sin_comentario|guardar_en )'),
+                        (TipoComponente.CONDICIONAL, r'^(si |inicio_si|final_si|sino |final_sino)'),
+                        (TipoComponente.REPETICION, r'^(mientras |inicia_mientras|final_mientas|desde |hasta |inicia_desde|final_desde)'),
+                        (TipoComponente.ESPERA, r'^(dormir )'),
+                        (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto )'),
+                        (TipoComponente.ALEATORIO, r'^(numerico_aletorio |de |a )'),
+                        (TipoComponente.TIPO, r'^(numerico |flotante |texto |bool )'),
+                        (TipoComponente.DECLARACION, r'^(tiene )'),
+                        (TipoComponente.OPERADOR_ARITMETICO, r'^(mas |menos |por |entre |residuo |elevado |modulo )'),
+                        (TipoComponente.OPERADOR_LOGICO, r'^(menor |mayor |menor_igual |mayor_igual |diferente |igual |y |o )'),
+                        (TipoComponente.TEXTO, r'^(".?[^~]*)"'),
                         (TipoComponente.IDENTIFICADOR, r'^([a-z]([a-zA-z0-9])*)'),
                         (TipoComponente.NUMERO, r'^(-?[0-9]+)'),
                         (TipoComponente.FLOTANTE, r'^(-?[0-9]+\.[0-9]+)'),
@@ -131,31 +182,22 @@ class Explorador:
         Itera sobre cada una de las líneas y las va procesando de forma que
         se generan los componentes lexicos necesarios en la etapa de
         análisis
-
-        Esta clase no esta manejando errores de ningún tipo
         """
 
-        #print(self.texto)
-        lineas = self.texto.split("\n")
-        #print(lineas)    
+        
 
-        index = 0  
-
-        #for linea in lineas:
-        #    print (linea)
+        lineas = self.texto.split("\n") 
+        index = 1
+        
 
         for linea in lineas:
-            try:
-                print(index)
-                resultado = self.procesar_linea(linea, index + 1)
-                self.componentes = self.componentes + resultado
-                index += 1
+            self.manejadorErrores.setlineaStr(index)
+            resultado = self.procesar_linea(linea, index)
+            self.componentes = self.componentes + resultado
+            self.manejadorErrores.manejar_errores(resultado)
+            index += 1
 
-            except tokenIncorrecto as e:
-                print(e)
 
-        for componente in self.componentes:
-            print(componente)
     def imprimir_componentes(self):
         """
         Imprime en pantalla en formato amigable al usuario los componentes
@@ -176,19 +218,21 @@ class Explorador:
 
         linea_original = linea
 
-        print (linea_original)
-
         while linea != "":
             valido = True
             for tipo, patron in self.regex_componentes:
-                coincidencia = re.search(patron, linea)
+                coincidencia = re.match(patron, linea)
 
                 if coincidencia is not None:
                     if not self.es_ignorable(tipo):
                         token = coincidencia.group(0)
-                        coincidencia_original = re.search(token, linea_original)
-                        nuevo_componente = ComponenteLéxico(tipo, token, coincidencia_original.end(),index)
-                        componentes.append(nuevo_componente)
+                        #coincidencia_original = re.match(token, linea_original)
+                        if token[-1] == " ":
+                            nuevo_componente = ComponenteLéxico(tipo, token[:-1], len(linea_original)-len(linea)+len(token),index)
+                            componentes.append(nuevo_componente)
+                        else:
+                            nuevo_componente = ComponenteLéxico(tipo, token, len(linea_original)-len(linea)+len(token),index)
+                            componentes.append(nuevo_componente)
                     
                     valido = False
                     linea = linea[coincidencia.end():]
@@ -198,17 +242,18 @@ class Explorador:
                 # este token es el ultimo de la linea
                 if linea.find(" ") == -1:
                     token = linea
-                    coincidencia_original = re.search(token, linea_original)
+                    coincidencia_original = re.match(token, linea_original)
                     
                     # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
-                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, coincidencia_original.end(),index)
+                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, len(linea_original)-len(linea)+len(token),index)
                     componentes.append(nuevo_componente)
+
                     break
                 else:
                     token = linea[0:linea.find(" ")]
-                    coincidencia_original = re.search(token, linea_original)
+                    coincidencia_original = re.match(token, linea_original)
                     # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
-                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, coincidencia_original.end(),index)
+                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, len(linea_original)-len(linea)+len(token),index)
                     componentes.append(nuevo_componente)
                     #continua la exploracion
                     linea = linea[linea.find(" "):]
@@ -233,50 +278,7 @@ class Explorador:
 
         return tipo_componente in ignorables
 
-"""
-Manejador de errores.
-Se setea el número de línea desde el main. Tiene que llamar setlineaStr(numlinea) desde la funcion que lleva el contador de linea del codigo
-Recibe: lista de ComponenteLéxico "componentes".
-Si encuentra un tipo de componente "ERROR", imprime el error.
-"""
-class ManejadorErrores:
 
-    lineaStr = "En la línea número "
-    columnaStr = "En la columna "
-    componenteStr = "En el componente " 
-    error : str
-    msjAdicional : str
-
-    def setlineaStr(self,numlinea):
-        self.lineaStr = self.lineaStr + str(numlinea) + ". "
-
-    def setcolumnaStr(self,numcolumna):
-        self.columnaStr = self.columnaStr + str(numcolumna) + ". "
-    
-    def setcomponenteStr(self,numcomponente):
-        self.componenteStr = self.componenteStr + str(numcomponente) + ". "
-
-    def getMensajeError(self):
-        msj = self.error + """
-        ******************************************** Error encontrado ****************************************************** 
-        \tUbicado en : """ + self.lineaStr + self.columnaStr + self.componenteStr + """\n\t\t...""" + self.msjAdicional + "..." + """        
-        ********************************************************************************************************************
-        """
-        return msj
-
-    def imprimir_error_Str(self,componente):
-        self.error = "...Error de escritura de componente detectado:"
-        self.msjAdicional = str(componente) + " mal escrito."
-
-        print(self.getMensajeError())
-    
-#son solo errores de saber si esta bien o mal escrito
-    def manejar_errores(self,componentes):
-        for componente in componentes:
-            if (componente.tipo == TipoComponente.ERROR):
-                self.setcolumnaStr(componente.columna)
-                self.setcomponenteStr(componente.texto)
-                self.imprimir_error_Str(componente)
 
 # Tests
 if __name__ == '__main__':
@@ -289,27 +291,7 @@ if __name__ == '__main__':
 
         lineas = explorador.explorar()
 
+        explorador.imprimir_componentes()
+
     else:
         print("No se seleccionó archivo")
-
-
-"""
-    linea_ejemplo = "Funcion es_par recib5e numerico numero inicio_funcion"
-
-    explorador = Explorador(linea_ejemplo)
-
-    # Test para procesar una linea
-    componentes = explorador.procesar_linea(linea_ejemplo, 1)
-    
-    print("Componentes de la linea:")
-    print(linea_ejemplo)
-
-    for componente in componentes:
-        print(componente)
-
-    #test de imprimir errores
-    numlineatest = 1
-    manejadorErrores = ManejadorErrores()
-    manejadorErrores.setlineaStr(numlineatest)
-    manejadorErrores.manejar_errores(componentes)
-"""
