@@ -1,5 +1,10 @@
+from tkinter import * 
+from tkinter.ttk import *
+from tkinter.filedialog import askopenfile
+
 # Explorador para el lenguaje Buho
 from enum import Enum, auto
+
 
 import re
 
@@ -98,8 +103,8 @@ class Explorador:
 
 
 
-    def __init__(self, contenido_archivo):
-        self.texto = contenido_archivo
+    def __init__(self, texto):
+        self.texto = texto
         self.componentes = []
 
     # Opción 1, retornando las líneas como lista
@@ -130,13 +135,27 @@ class Explorador:
         Esta clase no esta manejando errores de ningún tipo
         """
 
-        for linea, index in self.texto:
+        #print(self.texto)
+        lineas = self.texto.split("\n")
+        #print(lineas)    
+
+        index = 0  
+
+        #for linea in lineas:
+        #    print (linea)
+
+        for linea in lineas:
             try:
+                print(index)
                 resultado = self.procesar_linea(linea, index + 1)
                 self.componentes = self.componentes + resultado
+                index += 1
+
             except tokenIncorrecto as e:
                 print(e)
 
+        for componente in self.componentes:
+            print(componente)
     def imprimir_componentes(self):
         """
         Imprime en pantalla en formato amigable al usuario los componentes
@@ -156,6 +175,8 @@ class Explorador:
         componentes = []
 
         linea_original = linea
+
+        print (linea_original)
 
         while linea != "":
             valido = True
@@ -259,6 +280,20 @@ class ManejadorErrores:
 
 # Tests
 if __name__ == '__main__':
+
+    root = Tk()
+    archivo = askopenfile(mode ='r', filetypes =[('Archibos de Buho', '*.bh')])
+    if archivo is not None:
+        contenido_archivo = archivo.read()
+        explorador = Explorador(contenido_archivo)
+
+        lineas = explorador.explorar()
+
+    else:
+        print("No se seleccionó archivo")
+
+
+"""
     linea_ejemplo = "Funcion es_par recib5e numerico numero inicio_funcion"
 
     explorador = Explorador(linea_ejemplo)
@@ -277,3 +312,4 @@ if __name__ == '__main__':
     manejadorErrores = ManejadorErrores()
     manejadorErrores.setlineaStr(numlineatest)
     manejadorErrores.manejar_errores(componentes)
+"""
