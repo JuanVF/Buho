@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a>
-    <img src="imagenes/buho.jpg" alt="Logo" width="142" height="80">
+    <img src="imagenes/buho.jpg" alt="Logo" width="248" height="139">
   </a>
 
   <h3 align="center">Lenguaje buho</h3>
@@ -177,11 +177,12 @@ Distribuido por la licensia GPL v3. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contactos
 
-Sánchez Sánchez Miguel David - 2019061555 - miguelsanchez712000@gmail.com
-Sánchez Vargas Kaled - 2019160584 - kaledsv@gmail.com
-Lumbi Murillo Kimberly Verónica - 2020146765 - kilumur@gmail.com
-Vargas Fletes Juan José - 2020035292 - juanvfletes@estudiantec.cr
-Picado Arias Andrey Fabián- 2020135773 - andreypcd@gmail.com
+Desarrolladores del proyecto
+* Sánchez Sánchez Miguel David - 2019061555 - miguelsanchez712000@gmail.com
+* Sánchez Vargas Kaled - 2019160584 - kaledsv@gmail.com
+* Lumbi Murillo Kimberly Verónica - 2020146765 - kilumur@gmail.com
+* Vargas Fletes Juan José - 2020035292 - juanvfletes@estudiantec.cr
+* Picado Arias Andrey Fabián- 2020135773 - andreypcd@gmail.com
 
 Project Link: [https://gitlab.com/AndreyKdo/proyectocompiladores](https://gitlab.com/AndreyKdo/proyectocompiladores)
 
