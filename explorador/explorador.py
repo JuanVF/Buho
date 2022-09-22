@@ -8,8 +8,8 @@ from enum import Enum, auto
 import re
 
 """
-Manejador de errores.
-Se setea el número de línea desde el main. Tiene que llamar setlineaStr(numlinea) desde la funcion que lleva el contador de linea del codigo
+Clase que se encarga de manejar los posibles errores encontrados durante el proceso de exploración
+Se setea el número de línea desde el explorador de lienas. Tiene que llamar setlineaStr(numlinea) desde la funcion que lleva el contador de linea del codigo
 Recibe: lista de ComponenteLéxico "componentes".
 Si encuentra un tipo de componente "ERROR", imprime el error.
 """
@@ -24,16 +24,19 @@ class ManejadorErrores:
         self.msjAdicional : str
 
 
-
+    # recibe el numero de linea que se debe analizar
     def setlineaStr(self,numlinea):
         self.lineaStr = self.lineaStr + str(numlinea) + ". "
 
+    # recibe el indice de la linea donde empieza el error
     def setcolumnaStr(self,numcolumna):
         self.columnaStr = self.columnaStr + str(numcolumna) + ". "
     
+    # recibe el string que no coincide con un regex del lenguaje
     def setcomponenteStr(self,numcomponente):
         self.componenteStr = self.componenteStr + str(numcomponente) + ". "
 
+    # retorna el string con el mensaje de error si se encuentra
     def getMensajeError(self):
         msj = self.error + """
         ******************************************** Error encontrado ****************************************************** 
@@ -42,6 +45,7 @@ class ManejadorErrores:
         """
         return msj
 
+    # imprime el error para la revision del usuario
     def imprimir_error_Str(self,componente):
         self.error = "...Error de escritura de componente detectado:"
         self.msjAdicional = str(componente) + " mal escrito."
@@ -59,9 +63,7 @@ class ManejadorErrores:
 
 class TipoComponente(Enum):
     """
-    Enum con los tipos de componentes disponibles
-
-    Esta clase tiene mayormente un propósito de validación
+    Enum con los tipos de componentes lexicos del lenguaje
     """
     COMENTARIO = auto()
     PALABRA_CLAVE = auto()
@@ -91,9 +93,7 @@ class TipoComponente(Enum):
 class ComponenteLéxico:
     """
     Clase que almacena la información de un componente léxico
-
-    Notese que no almacena información auxiliar para mostrar errores lo
-    cuál es terrible
+    Alamacena el tipo del componente, el string que corresponde y la columna/index de donde se encuentra dentro del documento
     """
 
     tipo    : TipoComponente
@@ -109,9 +109,7 @@ class ComponenteLéxico:
 
     def __str__(self):
         """
-        Da una representación en texto de la instancia actual usando un
-        string de formato de python (ver 'python string formatting' en
-        google)
+        Retorna una representación de texto con los atributos del componente lexico, con respecto al formato de python
         """
 
         resultado = f'{self.tipo:30} <{self.texto}> en {self.fila}:{self.columna}'
@@ -119,16 +117,17 @@ class ComponenteLéxico:
 
 class Explorador:
     """
-    Clase que lleva el proceso principal de exploración y deja listos los
-    los componentes léxicos usando para ello los descriptores de
-    componente.
+    Clase que lleva el proceso principal de exploración y crea la lista de 
+    componentes léxicos que se utilizaran en el analizador, mediante el uso 
+    descriptores de componente.
 
     Un descriptor de componente es una tupla con dos elementos:
         - El tipo de componente
         - Un string de regex que describe los textos que son generados para
           ese componente
-    """
 
+    La instancia de manejadorErrores se utiliza para presentar los posibles errores al usuario
+    """
     manejadorErrores = ManejadorErrores()
 
     regex_componentes=[ (TipoComponente.COMENTARIO, r'^//.*'),
@@ -158,43 +157,28 @@ class Explorador:
         self.texto = texto
         self.componentes = []
 
-    # Opción 1, retornando las líneas como lista
-    # archivo = open("nombre_archivo.ext")
-    # lineas = archivo.readlines() # Almacena las líneas del archivo en una lista 
-    # archivo.close()    
-    # return lineas
- 
-
-    # Opción 2, invocando  el procesamiento / lectura de línea por línea
-    # archivo = open("nombre_archivo.ext",'r')
-    # while True:
-    #    siguiente_linea = archivo.readline()
-
-    #    if not siguiente_linea:
-    #       break
-    #    ***método para leer/procesar línea*** siguiente_linea.strip()
-
-    # archivo.close()
-
     
     def explorar(self):
         """
         Itera sobre cada una de las líneas y las va procesando de forma que
         se generan los componentes lexicos necesarios en la etapa de
         análisis
-        """
 
-        
+        Se manda el numero de linea y componentes lexicos que se generaron al 
+        manejador de errores, por si se encontro un error para comunicarselo
+        al usuario
+        """
 
         lineas = self.texto.split("\n") 
         index = 1
         
-
         for linea in lineas:
-            self.manejadorErrores.setlineaStr(index)
             resultado = self.procesar_linea(linea, index)
             self.componentes = self.componentes + resultado
+
+            self.manejadorErrores.setlineaStr(index)
             self.manejadorErrores.manejar_errores(resultado)
+
             index += 1
 
 
@@ -205,8 +189,7 @@ class Explorador:
         """
 
         for componente in self.componentes:
-            print(componente) # Esto funciona por que el print llama al
-            # método __str__ de la instancia
+            print(componente)
 
 
 
@@ -223,10 +206,19 @@ class Explorador:
             for tipo, patron in self.regex_componentes:
                 coincidencia = re.match(patron, linea)
 
+                """ 
+                Si el primer string encontrado concuerda con algun regex 
+                y no es un componente irrelevante (un comentario o espacio en BLANCOS)
+                entonces se guarda en la lista de componentes
+                """
                 if coincidencia is not None:
                     if not self.es_ignorable(tipo):
                         token = coincidencia.group(0)
-                        #coincidencia_original = re.match(token, linea_original)
+                        """ 
+                        algunos componentes (como los operadores logicos) requieren un espacio 
+                        para que identificadores con esas palabras (funcion mayorDeDosNumeros) no sean confundidos por el regex
+                        pero este espacio es innecesario dentro del componente lexico
+                        """
                         if token[-1] == " ":
                             nuevo_componente = ComponenteLéxico(tipo, token[:-1], len(linea_original)-len(linea)+len(token),index)
                             componentes.append(nuevo_componente)
@@ -237,9 +229,13 @@ class Explorador:
                     valido = False
                     linea = linea[coincidencia.end():]
                     break
+            """
+                Si el string termino la comparacion de los descriptores de componentes y no
+                se encontro un patron con el que coincide, significa que esta mal formado o es 
+                invalido, por lo que se crea un componente ERROR para que el manejadorErrores lo reconozca
+            """
             if valido:
-                # Opcion 1, seleccionar el token equivocado y continuar con la llinea
-                # este token es el ultimo de la linea
+                # el string error es el ultimo de la linea, por lo que se puede terminar la exploración de la linea
                 if linea.find(" ") == -1:
                     token = linea
                     coincidencia_original = re.match(token, linea_original)
@@ -249,6 +245,7 @@ class Explorador:
                     componentes.append(nuevo_componente)
 
                     break
+                # Despues del string con error se puede seguir explorando la linea
                 else:
                     token = linea[0:linea.find(" ")]
                     coincidencia_original = re.match(token, linea_original)
@@ -257,22 +254,12 @@ class Explorador:
                     componentes.append(nuevo_componente)
                     #continua la exploracion
                     linea = linea[linea.find(" "):]
-                    """
-
-                # Opcion 2, dejar de leer la linea y levantar la excepcion
-                if linea.find(" ") == -1:
-                    if linea.find("\n") == -1:
-                        raise tokenIncorrecto(linea, index, re.search(token, linea_original).end())
-                    else:
-                        raise tokenIncorrecto(linea[0:linea.find("\n")], index, re.search(token, linea_original).end())
-                else:
-                    raise tokenIncorrecto(linea[0:linea.find(" ")], index, re.search(token, linea_original).end())"""
 
         return componentes
 
     def es_ignorable(self, tipo_componente):
         """
-        Determina si un componente se puede ignorar o no
+        Determina si un componente es irrelevante para la lista de componentes, como los comentarios o espacios
         """
         ignorables = [TipoComponente.BLANCOS, TipoComponente.COMENTARIO]
 
