@@ -5,7 +5,7 @@ version_lenguaje = "0.1.0"
 """
     Imprime la ayuda del lenguaje
 """
-def help(archivo : str):
+def help(archivo : str = ""):
     print(f"{bcolors.WARNING}Ayuda: {bcolors.HEADER}buho.py {bcolors.ENDC}[ruta_archivo] [opcion]")
     print(f"""{bcolors.WARNING}
     /╲ ︵ ╱\\
@@ -26,5 +26,5 @@ def help(archivo : str):
 """
     Imprime la versión del lenguaje
 """
-def version(archivo : str):
+def version(archivo : str = ""):
     print(f"buho {version_lenguaje}")
