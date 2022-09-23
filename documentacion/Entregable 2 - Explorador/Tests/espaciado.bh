@@ -1,0 +1,12 @@
+funcion       crear_usuario recibe mapa usuarios texto comentario_id texto comentario_nombre
+inicio_funcion
+
+  numerico      id tiene 0
+  texto nombre tiene ""
+
+  recibir_entrada con_comentario       comentario_id guardar_en id
+  recibir_entrada con_comentario comentario_nombre guardar_en nombre
+
+  usuarios en id tiene       nombre
+
+final_funcion

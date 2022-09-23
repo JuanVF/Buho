@@ -1,8 +1,10 @@
 # Explorador para el lenguaje Buho
 
-from tkinter import * 
-from tkinter.ttk import *
-from tkinter.filedialog import askopenfile
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from logger import bcolors
+
 from enum import Enum, auto
 
 import re
@@ -14,8 +16,6 @@ Recibe: lista de ComponenteLéxico "componentes".
 Si encuentra un tipo de componente "ERROR", imprime el error.
 """
 class ManejadorErrores:
-
-
     def __init__(self):
         self.lineaStr = "En la línea número "
         self.columnaStr = "En la columna "
@@ -38,9 +38,9 @@ class ManejadorErrores:
 
     # retorna el string con el mensaje de error si se encuentra
     def getMensajeError(self):
-        msj = self.error + """
-        ******************************************** Error encontrado ****************************************************** 
-        \tUbicado en : """ + self.lineaStr + self.columnaStr + self.componenteStr + """\n\t\t...""" + self.msjAdicional + "..." + """        
+        msj = self.error + f"""
+        ******************************************** {bcolors.FAIL}Error encontrado{bcolors.ENDC} ****************************************************** 
+        {bcolors.WARNING}\tUbicado en : """ + self.lineaStr + self.columnaStr + self.componenteStr + """\n\t\t...""" + self.msjAdicional + "..." + f"""{bcolors.ENDC}        
         ********************************************************************************************************************
         """
         return msj
@@ -112,7 +112,7 @@ class ComponenteLéxico:
         Retorna una representación de texto con los atributos del componente lexico, con respecto al formato de python
         """
 
-        resultado = f'{self.tipo:30} <{self.texto}> en {self.fila}:{self.columna}'
+        resultado = f'{bcolors.OKCYAN}{self.tipo:30} {bcolors.OKGREEN}<{self.texto}> en {bcolors.WARNING}{self.fila}:{self.columna}{bcolors.ENDC}'
         return resultado
 
 class Explorador:
@@ -145,8 +145,8 @@ class Explorador:
                         (TipoComponente.OPERADOR_LOGICO, r'^(menor |mayor |menor_igual |mayor_igual |diferente |igual |y |o )'),
                         (TipoComponente.TEXTO, r'^(".?[^~]*)"'),
                         (TipoComponente.IDENTIFICADOR, r'^([a-z]([a-zA-z0-9])*)'),
-                        (TipoComponente.NUMERO, r'^(-?[0-9]+)'),
                         (TipoComponente.FLOTANTE, r'^(-?[0-9]+\.[0-9]+)'),
+                        (TipoComponente.NUMERO, r'^(-?[0-9]+)'),
                         (TipoComponente.BOOLEANO, r'^(verdadero|falso)'),
                         (TipoComponente.PUNTUACION, r'^(\n)'),
                         (TipoComponente.BLANCOS, r'^(\s)+')]
@@ -214,17 +214,18 @@ class Explorador:
                 if coincidencia is not None:
                     if not self.es_ignorable(tipo):
                         token = coincidencia.group(0)
+                        num_columna = len(linea_original)-len(linea)+len(token)
                         """ 
                         algunos componentes (como los operadores logicos) requieren un espacio 
                         para que identificadores con esas palabras (funcion mayorDeDosNumeros) no sean confundidos por el regex
                         pero este espacio es innecesario dentro del componente lexico
                         """
+                        nuevo_componente = ComponenteLéxico(tipo, token, num_columna, index)
+
                         if token[-1] == " ":
-                            nuevo_componente = ComponenteLéxico(tipo, token[:-1], len(linea_original)-len(linea)+len(token),index)
-                            componentes.append(nuevo_componente)
-                        else:
-                            nuevo_componente = ComponenteLéxico(tipo, token, len(linea_original)-len(linea)+len(token),index)
-                            componentes.append(nuevo_componente)
+                            nuevo_componente = ComponenteLéxico(tipo, token[:-1], num_columna, index)
+
+                        componentes.append(nuevo_componente)
                     
                     valido = False
                     linea = linea[coincidencia.end():]
@@ -236,22 +237,16 @@ class Explorador:
             """
             if valido:
                 # el string error es el ultimo de la linea, por lo que se puede terminar la exploración de la linea
-                if linea.find(" ") == -1:
-                    token = linea
-                    coincidencia_original = re.match(token, linea_original)
-                    
-                    # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
-                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, len(linea_original)-len(linea)+len(token),index)
-                    componentes.append(nuevo_componente)
+                token = linea[0:linea.find(" ")]
 
+                # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
+                nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, len(linea_original)-len(linea)+len(token),index)
+                componentes.append(nuevo_componente)
+
+                if linea.find(" ") == -1:
                     break
                 # Despues del string con error se puede seguir explorando la linea
                 else:
-                    token = linea[0:linea.find(" ")]
-                    coincidencia_original = re.match(token, linea_original)
-                    # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
-                    nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token, len(linea_original)-len(linea)+len(token),index)
-                    componentes.append(nuevo_componente)
                     #continua la exploracion
                     linea = linea[linea.find(" "):]
 
@@ -266,19 +261,12 @@ class Explorador:
         return tipo_componente in ignorables
 
 
+"""
+    Dado un archivo de texto, se encarga de crear los componentes léxicos
+"""
+def invocar_explorador(contenido_archivo):
+    explorador = Explorador(contenido_archivo)
 
-# Tests
-if __name__ == '__main__':
+    lineas = explorador.explorar()
 
-    root = Tk()
-    archivo = askopenfile(mode ='r', filetypes =[('Archibos de Buho', '*.bh')])
-    if archivo is not None:
-        contenido_archivo = archivo.read()
-        explorador = Explorador(contenido_archivo)
-
-        lineas = explorador.explorar()
-
-        explorador.imprimir_componentes()
-
-    else:
-        print("No se seleccionó archivo")
+    explorador.imprimir_componentes()

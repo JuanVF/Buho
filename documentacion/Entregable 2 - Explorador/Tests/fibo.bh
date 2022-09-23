@@ -1,0 +1,11 @@
+// Fibonacci
+funcion fibo recibe numerico n inicio_funcion
+  si n menor 2 inicio_si
+    devuelve n
+  final_si
+
+  numerico n1 tiene llamar fibo recibe n menos 1
+  numerico n2 tiene llamar fibo recibe n menos 2
+
+  devuelve n1 mas n2
+final_funcion

@@ -1,0 +1,5 @@
+Funcion recibirNombre Inicio_Funcion
+  texto nombre tiene ""
+  recibir_entrada con_comentario "digite el nombre" guardar_en nombre
+  devuelve nombre
+Final_Funcion
