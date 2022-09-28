@@ -56,7 +56,9 @@
 
 ## Acerca del proyecto
 
-[![Product Name Screen Shot][images/screenshot producto.png]](https://example.com)
+<a>
+  <img src="images/screenshot producto.png" alt="Logo" width="746" height="402">
+</a>
 
 Hay muchos lenguajes para programar, sin embargo, pocos se centran en facilitar la programacion a las personas con discapacidades y tienen dificultades a la hora de escribir o entener el lenguaje
 
