@@ -240,6 +240,38 @@ class NodoLlamada(NodoArbol):
                 param.preorden()
 
 """
+Clase de nodo para las operaciones
+"""
+class NodoOperacion(NodoArbol):
+    primer_valor : NodoValor
+    operacion : NodoArbol
+    segundo_valor : NodoValor
+
+    def __init__(self, primer_valor = None, operacion = None, segundo_valor = None, atributos = None):
+        super().__init__(atributos)
+
+        self.primer_valor = primer_valor
+        self.operacion = operacion
+        self.segundo_valor = segundo_valor
+
+    def __str__(self):
+        resultado = super().__str__()
+        resultado += self.imprimirAtt(self.primer_valor)
+        resultado += self.imprimirAtt(self.operacion)
+        resultado += self.imprimirAtt(self.segundo_valor)
+
+        return resultado
+
+    def preorden(self):
+        print(self)
+        if self.primer_valor is not None:
+            self.primer_valor.preorden()
+        if self.operacion is not None:
+            self.operacion.preorden()
+        if self.segundo_valor is not None:
+            self.segundo_valor.preorden()
+
+"""
 Clase de nodo para las operaciones aritméticas
  - operado: nodo valor, identificador, llamada u operación aritmética al que se le aplicara la operación aritmética
  - operador: suma, resta, division, etc...
@@ -314,7 +346,7 @@ Clase de nodo para las expresiones o asignación de valores a una variable
 """
 class NodoExpresion(NodoArbol):
     identificador : NodoIdentificador
-    valor : NodoArbol
+    operacion : NodoOperacion
 
     def __init__(self, identificador = None, valor = None, atributos = None):
         super().__init__(atributos)
