@@ -2,6 +2,7 @@
 from tipoDatos import TipoDatos
 from operandosLogicos import OperandosLogicos
 from operandosAritmeticos import OperandosAritmeticos
+from logger import bcolors
 
 """
 Clase de nodo general para el árbol de sintaxis abstracta
@@ -75,10 +76,20 @@ class NodoError(NodoArbol):
 
     def __init__(self, error=None, linea=None, columna=None, sugerencia=None, atributos=None):
         super().__init__(atributos)
-        self.error = error
         self.linea = linea
         self.columna = columna
+        self.tipoError = "Error sintáctico detectado en: "
+        self.error = error
         self.sugerencia = sugerencia
+        print(self.printErr())
+
+    def printErr(self):
+        msj = f"""
+                ******************************************** {bcolors.FAIL}Error encontrado{bcolors.ENDC} ****************************************************** 
+                {bcolors.WARNING}\t""" + self.tipoError + ("linea: " + self.linea) + (", columna: " + self.columna) + (", " + self.error) + " mientras se analizaba" + """\n\t\t\t\t\t...""" + self.sugerencia + "..." + f"""{bcolors.ENDC}        
+                ********************************************************************************************************************
+                """
+        return msj
 
     def __str__(self):
         resultado = super().__str__()
@@ -746,6 +757,7 @@ c = NodoIdentificador("ident")
 d = NodoLlamada("llamada", [a, b])
 e = NodoDevuelve(a)
 z = NodoFuncion("funcionazao", None, [b,c,d], e)
+x = NodoError("falta el componente inicio_mientras", "1", "10", "Debe incluir esta palabra para completar el mientras")
 print(a)
 print(b)
 print(c)

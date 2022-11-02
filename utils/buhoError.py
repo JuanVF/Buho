@@ -27,8 +27,8 @@ class BuhoError(Exception):
 
 #==============================================ERRORES SINTACTICOS=========================================
 class BuhoErrorSintactico(BuhoError):
-    def __int__(self, linea, columna, error, recomendacion, tipoError):
-        super(BuhoErrorSintactico, self).__int__(linea, columna, tipoError, error, recomendacion)
+    def __int__(self, linea, columna, error, recomendacion, tipoError = "Error sintáctico detectado en: "):
+        super().__int__(linea, columna, tipoError, error, recomendacion)
 
     def __str__(self):
         msj = self.tipoError + f"""
@@ -40,8 +40,8 @@ class BuhoErrorSintactico(BuhoError):
 
 class BuhoErrorComponenteFaltante(BuhoErrorSintactico):
     def __int__(self, linea, columna, componenteFaltante, recomendacion, tipoError = "Error sintáctico detectado en: "):
-        super(BuhoErrorComponenteFaltante, self).__int__(linea, columna, tipoError, ("falta el componente " + componenteFaltante), recomendacion)
+        super().__int__(linea, columna, ("falta el componente " + componenteFaltante), recomendacion)
 
-class BuhoErrorFuncionNoDefinida(BuhoError):
+class BuhoErrorFuncionNoDefinida(BuhoErrorSintactico):
     def __int__(self, linea, columna, componente, recomendacion, tipoError = "Error sintáctico detectado en: "):
-        super(BuhoErrorFuncionNoDefinida, self).__int__(linea, columna, tipoError, ("la funcion "+ componente + " no esta definida"), recomendacion)
+        super().__int__(linea, columna, ("la funcion "+ componente + " no esta definida"), recomendacion)
