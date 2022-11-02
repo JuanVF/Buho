@@ -4,7 +4,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras
+from utils.arbolito import NodoDesde, NodoDormir, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
 
 class Analizador:
     componentes_lexicos : list
@@ -148,7 +148,14 @@ class Analizador:
         elif self.componente_actual.texto == 'mientras':
             nodos_nuevos += [self.__analizar_mientras()]
 
-        # Pendiente de implementar la segunda parte de los operandos (Desde, Dormir, ValorAbosulto)    
+        elif self.componente_actual.texto == 'desde':
+            nodos_nuevos += [self.__analizar_Desde()]
+
+        elif self.componente_actual.texto == 'dormir':
+            nodos_nuevos += [self.__analizar_Dormir()]
+
+        elif self.componente_actual.texto == 'valor_absoluto':
+            nodos_nuevos += [self.__analizar_ValorAbsoluto()]    
 
         else: #Reservado para manejar errores
             nodos_nuevos += [self.__analizar_error()]
@@ -227,9 +234,9 @@ class Analizador:
         
         # Se empieza el análisis del Si
         self.__verificar('si') #Palabra reservada
-        # Condicion 
+        # condicion =
         self.__verificar('inicio_si') #Palabra reservada
-        # Instruccion+
+        instrucciones = self.__verificar_identificador()
         self.__verificar('final_si') #Palabra reservada
         self.__verificar('\n') #Palabra reservada
 
@@ -238,8 +245,8 @@ class Analizador:
         #De la siguiente manera se implementan los "0 o 1 repetición" (?):
 
         if self.componente_actual.texto == 'sino':
-            # Instruccion+
-            return NodoSino(instrucciones)
+            instrucciones_sino = self.__verificar_identificador()
+            sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
 
         return NodoSi(condicion, instrucciones, sino) # Preguntar porque el sino no es opcional
@@ -251,13 +258,46 @@ class Analizador:
         
         # Se empieza el análisis del mientras
         self.__verificar('mientras') #Palabra reservada
-        # Condicion
+        # condicion =
         self.__verificar('inicia_mientras') #Palabra reservada
-        #Instruccion+
+        instrucciones = self.__verificar_identificador()
         self.__verificar('final_mientras') #Palabra reservada
 
         return NodoMientras(condicion, instrucciones)
 
+    def __analizar_Desde(self):
+        """
+        Desde ::= "desde" Numero "hasta" Numero "inicia_desde" Instruccion+ "final_desde"
+        """
+        self.__verificar('desde')
+        iniciorango = self.__verificar_numero()
+        self.__verificar('hasta')
+        finalrango = self.__verificar_numero()
+        self.__verificar('inicia_desde')
+
+        instrucciones = self.__verificar_identificador()
+        self.__verificar('final_desde')
+
+        return NodoDesde(iniciorango, finalrango, instrucciones)
+
+    def __analizar_Dormir(self):
+        """
+        Dormir ::= "dormir" Numero
+        """
+        self.__verificar('desde')
+        tiempo = self.__verificar_numero()
+
+        return NodoDormir(tiempo)
+
+
+    def __analizar_ValorAbsoluto(self):
+        """
+        ValorAbsoluto ::= "valor_absoluto" Numero
+        """
+        self.__verificar('valor_absoluto')
+        numero = self.__verificar_numero()
+
+        return NodoValorAbsoluto(numero)
 
     def __verificar_numero(self):
         """
