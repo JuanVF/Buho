@@ -4,7 +4,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano
+from utils.arbolito import NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras
 
 class Analizador:
     componentes_lexicos : list
@@ -16,8 +16,6 @@ class Analizador:
         """
         Expresion ::= Identificador "tiene" Operacion
         """
-
-        nodos_nuevos = []
 
         # Verificar que el componente actual sea un identificador
         identificador = self.__verificar_identificador()
@@ -121,6 +119,145 @@ class Analizador:
             return NodoAleatorio(primer_numero, segundo_numero)
         else:
             return NodoAleatorio()
+
+
+    def __analizar_operando(self):    
+        """
+        Operandos::= (Escribir | Recibir_entrada | Si | Mientras | Desde | Dormir | ValorAbsoluto)
+
+        OJO! Por favor note que el nombre de la regla es igual a la palabra reservada,
+             con la diferencia de que esta última empieza con minúscula.
+             En el momento de analizar el componente actual, se debe tomar 
+             en cuenta este aspecto para buscarlo adecuadamente (utilizando la palabra reservada)
+    
+        """
+        
+        nodos_nuevos = []    # no deberiamos tener, porque hay que hacer una instancia de la clase y actualizar el atributo  
+
+
+        # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis. 
+        if self.componente_actual.texto == 'escribir':
+            nodos_nuevos += [self.__analizar_escribir()]
+
+        elif self.componente_actual.texto == 'recibir_entrada':
+            nodos_nuevos += [self.__analizar_recibir_entrada()]
+
+        elif self.componente_actual.texto == 'si':
+            nodos_nuevos += [self.__analizar_si()]
+
+        elif self.componente_actual.texto == 'mientras':
+            nodos_nuevos += [self.__analizar_mientras()]
+
+        # Pendiente de implementar la segunda parte de los operandos (Desde, Dormir, ValorAbosulto)    
+
+        else: #Reservado para manejar errores
+            nodos_nuevos += [self.__analizar_error()]
+
+
+        # Acá yo debería volarme el nivel Intrucción por que no aporta nada
+        return NodoÁrbol(TipoNodo.INSTRUCCIÓN, nodos=nodos_nuevos)
+
+    def __analizar_escribir(self):
+        """
+        Escribir ::= "escribir" (Booleano | Numero | Texto | Identificador)**
+        """
+
+        # Se empieza el análisis
+        self.__verificar('escribir') #Palabra reservada
+        self.__verificar('(')
+      
+        valor = self.__analizar_valor() # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica. 
+
+        self.__verificar(')')
+
+        return NodoEscribir(valor)
+
+    def __analizar_recibir_entrada(self):
+        """
+        Recibir_entrada ::= "recibir_entrada" ("con_comentario" (Booleano | Numero | Texto) | "sin_comentario" ) Guardar_en
+        
+        Guardar_en ::= "guardar_en" Identificador
+        """
+        
+        # Se empieza el análisis de recibir_entrada
+        self.__verificar('recibir_entrada') #Palabra reservada
+        self.__verificar('(')
+
+        if self.__verificar('con_comentario'): 
+            # Revisar esto porque NO me estoy pasando el comentario por el quinto forro del pantalón
+            # Sin embargo, es necesario verificar el string que es parte de la sintaxis
+            # Además, el comentario es uno de los parámetros del NodoRecibirEntrada
+            tipo = self.componente_actual.tipo
+
+            if tipo == TipoComponente.BOOLEANO:
+                comentario = self.__verificar_booleano()
+                #pass
+
+            if tipo == TipoComponente.NUMERO:
+                comentario = self.__verificar_numero()
+                #pass
+
+            if tipo == TipoComponente.TEXTO:
+                comentario = self.__verificar_texto()
+                #pass
+
+            self.__verificar(')')
+
+        elif self.__verificar('sin_comentario'):
+            pass
+
+        else:
+            """
+            Aqui se deberia levantar una Excepcion de que no se esta respetando el string de la gramatica
+            """
+            pass
+
+        # Entra en juego Guardar_en
+        self.__verificar('guardar_en') #Palabra reservada
+        identificador_objetivo = self.__verificar_identificador()
+
+        return NodoRecibirEntrada(comentario, identificador_objetivo)
+
+    def __analizar_si(self):
+        """
+        Si ::= "si" Condicion "inicio_si" Instruccion+ "final_si" ("\n" sino)?
+        
+        Sino ::= "sino" Instruccion+ "final_sino"
+        """
+        
+        # Se empieza el análisis del Si
+        self.__verificar('si') #Palabra reservada
+        # Condicion 
+        self.__verificar('inicio_si') #Palabra reservada
+        # Instruccion+
+        self.__verificar('final_si') #Palabra reservada
+        self.__verificar('\n') #Palabra reservada
+
+        # Aqui entra en juego el sino
+
+        #De la siguiente manera se implementan los "0 o 1 repetición" (?):
+
+        if self.componente_actual.texto == 'sino':
+            # Instruccion+
+            return NodoSino(instrucciones)
+        # no entrar en el if representa las 0 repeticiones
+
+        return NodoSi(condicion, instrucciones, sino) # Preguntar porque el sino no es opcional
+
+    def __analizar_mientras(self):
+        """
+        Mientras ::= "mientras" Condición "inicia_mientras" Instruccion+ "final_mientras"
+        """
+        
+        # Se empieza el análisis del mientras
+        self.__verificar('mientras') #Palabra reservada
+        # Condicion
+        self.__verificar('inicia_mientras') #Palabra reservada
+        #Instruccion+
+        self.__verificar('final_mientras') #Palabra reservada
+
+        return NodoMientras(condicion, instrucciones)
+
 
     def __verificar_numero(self):
         """
