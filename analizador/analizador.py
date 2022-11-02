@@ -236,7 +236,7 @@ class Analizador:
         self.__verificar('si') #Palabra reservada
         # condicion =
         self.__verificar('inicio_si') #Palabra reservada
-        instrucciones = self.__verificar_identificador()
+        # instrucciones = self.__verificar_instrucciones()
         self.__verificar('final_si') #Palabra reservada
         self.__verificar('\n') #Palabra reservada
 
@@ -245,7 +245,7 @@ class Analizador:
         #De la siguiente manera se implementan los "0 o 1 repetición" (?):
 
         if self.componente_actual.texto == 'sino':
-            instrucciones_sino = self.__verificar_identificador()
+            # instrucciones_sino = self.__verificar_instrucciones()
             sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
 
@@ -260,7 +260,7 @@ class Analizador:
         self.__verificar('mientras') #Palabra reservada
         # condicion =
         self.__verificar('inicia_mientras') #Palabra reservada
-        instrucciones = self.__verificar_identificador()
+        # instrucciones = self.__verificar_instrucciones()
         self.__verificar('final_mientras') #Palabra reservada
 
         return NodoMientras(condicion, instrucciones)
@@ -275,7 +275,7 @@ class Analizador:
         finalrango = self.__verificar_numero()
         self.__verificar('inicia_desde')
 
-        instrucciones = self.__verificar_identificador()
+        # instrucciones = self.__verificar_instrucciones()
         self.__verificar('final_desde')
 
         return NodoDesde(iniciorango, finalrango, instrucciones)
