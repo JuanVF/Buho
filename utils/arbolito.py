@@ -1,7 +1,7 @@
 # clases para el manejo de un árbol de sintáxis abstracta
-from tipoDatos import TipoDatos
-from operandosLogicos import OperandosLogicos
-from operandosAritmeticos import OperandosAritmeticos
+from utils.tipoDatos import TipoDatos
+from utils.operandosLogicos import OperandosLogicos
+from utils.operandosAritmeticos import OperandosAritmeticos
 from logger import bcolors
 
 """
@@ -750,19 +750,3 @@ class Arbol:
 
     def imprimir_preorden(self):
         self.raiz.preorden(0)
-
-a = NodoValor(TipoDatos.TEXTO, "a")
-b = NodoNumero(10)
-c = NodoIdentificador("ident")
-d = NodoLlamada("llamada", [a, b])
-e = NodoDevuelve(a)
-z = NodoFuncion("funcionazao", None, [b,c,d], e)
-x = NodoError("falta el componente inicio_mientras", "1", "10", "Debe incluir esta palabra para completar el mientras")
-print(a)
-print(b)
-print(c)
-print(d)
-print(e)
-print(z)
-print()
-z.preorden(0)
