@@ -165,8 +165,10 @@ class Analizador:
     
         """
         
-        nodos_nuevos = []    # no deberiamos tener, porque hay que hacer una instancia de la clase y actualizar el atributo  
+        nodos_nuevos = []  
 
+        
+        self.__verificar('(')
 
         # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis. 
         if self.componente_actual.texto == 'escribir':
@@ -193,9 +195,10 @@ class Analizador:
         else: #Reservado para manejar errores
             nodos_nuevos += [self.__analizar_error()]
 
+        
+        self.__verificar(')')
 
-        # Acá yo debería volarme el nivel Intrucción por que no aporta nada
-        return NodoÁrbol(TipoNodo.INSTRUCCIÓN, nodos=nodos_nuevos)
+        #return No vi tal cosa como NodoOperando, es NodoFuncion???
 
     def __analizar_escribir(self):
         """
@@ -270,7 +273,7 @@ class Analizador:
         
         # Se empieza el análisis del Si
         self.__verificar('si') #Palabra reservada
-        # condicion =
+        condicion = self.__analizar_condicion()
         self.__verificar('inicio_si') #Palabra reservada
         instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_si') #Palabra reservada
@@ -285,7 +288,7 @@ class Analizador:
             sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
 
-        return NodoSi(condicion, instrucciones, sino) # Preguntar porque el sino no es opcional
+        return NodoSi(condicion, instrucciones, sino) # Preguntar por qué el sino no es opcional
 
     def __analizar_mientras(self):
         """
@@ -294,7 +297,7 @@ class Analizador:
         
         # Se empieza el análisis del mientras
         self.__verificar('mientras') #Palabra reservada
-        # condicion =
+        condicion = self.__analizar_condicion()
         self.__verificar('inicia_mientras') #Palabra reservada
         instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_mientras') #Palabra reservada
@@ -316,7 +319,36 @@ class Analizador:
 
         return NodoDesde(iniciorango, finalrango, instrucciones)
 
-    
+    def __analizar_condicion(self):
+        """
+            Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
+            Comentario no se lee ya que es excluido desde el explorador. 
+            AccesoDatosComplejos tambien se excluyó
+        """
+        nodos_nuevos = []
+        while(True):
+
+            if self.componente_actual.tipo == TipoComponente.TIPO:
+                nodos_nuevos += [self.__analizar_declaracion()]
+
+            elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+                nodos_nuevos += [self.__analizar_expresion()]
+
+            elif self.componente_actual.texto in ['escribir','recibir_entrada','si','mientras','desde','dormir','valor_absoluto']:
+                nodos_nuevos += [self.__analizar_operando()]
+
+            elif self.componente_actual.texto == 'devuelve':
+                nodos_nuevos += [self.__analizar_devuelve()] #pendiente
+
+            else:                
+                break
+        
+        if nodos_nuevos == []:
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
+            "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+            return nodoError
+        return nodos_nuevos    
 
     def __analizar_instrucciones(self):
         """
