@@ -91,7 +91,7 @@ class Analizador:
             return self.__analizar_aleatorio()
 
         """
-        @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un valor
+        Error Sintáctico
         """
         nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
         self.componente_actual.fila, self.componente_actual.columna,
