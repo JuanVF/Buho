@@ -93,8 +93,8 @@ class Analizador:
         """
         @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un valor
         """
-        nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-        "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+        nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+        self.componente_actual.fila, self.componente_actual.columna,
         "Debe ser un valor entre Identificador | Numero | Flotante | Texto | Booleano | Aleatorio")
         return nodoError
 
@@ -220,8 +220,8 @@ class Analizador:
             """
             Aqui se deberia levantar una Excepcion de que no se esta respetando el string de la gramatica
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "recibir_entrada debe tener con_comentario un Booleano o Numero o Texto o un sin_comentario o bien seguido de un guardar_en ")
             return nodoError
 
@@ -313,8 +313,8 @@ class Analizador:
                 break
         
         if nodos_nuevos == []:
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
             return nodoError
         return nodos_nuevos
@@ -366,10 +366,10 @@ class Analizador:
         """
         if self.componente_actual.tipo != TipoComponente.NUMERO:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un numero
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "Debe ser un valor numerico")
             return nodoError
 
@@ -385,10 +385,10 @@ class Analizador:
         """
         if self.componente_actual.tipo != TipoComponente.FLOTANTE:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un flotante
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "Debe ser un valor flotante")
             return nodoError
 
@@ -404,10 +404,10 @@ class Analizador:
         """
         if self.componente_actual.tipo != TipoComponente.TEXTO:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un texto
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "Debe ser un valor de tipo texto")
             return nodoError
 
@@ -423,10 +423,10 @@ class Analizador:
         """
         if self.componente_actual.tipo != TipoComponente.BOOLEANO:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un booleano
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "Debe ser un valor booleano")
             return nodoError
 
@@ -452,10 +452,10 @@ class Analizador:
 
         if self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un identificador
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "Hace falta un identificador")
             return nodoError
 
@@ -471,10 +471,10 @@ class Analizador:
         """
         if self.componente_actual != texto:
             """
-            @Kaled Aqui se deberia levantar una Excepcion de sintaxis incorrecta
+            Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
-            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
+            self.componente_actual.fila, self.componente_actual.columna,
             "El componente "+texto+" no es reconocido.")
             return nodoError
 
