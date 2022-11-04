@@ -421,6 +421,88 @@ class Analizador:
         numero = self.__verificar_numero()
 
         return NodoValorAbsoluto(numero)
+    
+    def __analizar_instruccion(self):
+        """
+        Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
+        """
+
+        if self.componente_actual.texto in {'numerico' , 'flotante' , 'texto' , 'bool'}:
+            instruccion = self.__analizar_declaracion()
+
+        elif self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+            instruccion = self.__analizar_expresion()
+
+        elif self.componente_actual.texto in {'escribir' , 'recibir_entrada' , 'si' , 'mientras' , 'desde' , 'dormir' , 'valor_absoluto'}:
+            instruccion = self.__analizar_operando()
+
+        elif self.componente_actual.texto == 'devuelve':
+            instruccion = self.__analizar_devuelve()
+
+        else: #Reservado para manejar errores
+            instruccion = self.__analizar_error()
+
+        return instruccion
+
+
+    def __analizar_funcion(self):
+        """
+        Funcion ::= "funcion" Identificador Parametros? "inicio_funcion" (Instruccion+)? Devuelve "final_funcion."      
+        """
+        self.__verificar('funcion')
+        identificador = self.__verificar_identificador()
+        if self.componente_actual != 'recibe':
+            patrametros = self.__analizar_parametros()
+
+        nodos_instruccion = []
+
+        self.__verificar('inicio_funcion')
+        nodos_instruccion += [self.__analizar_instruccion()]
+
+        while  self.componente_actual.texto in {'numerico' , 'flotante' , 'texto' , 'bool','escribir' , 'recibir_entrada' , 'si' , 'mientras' , 'desde' , 'dormir' , 'valor_absoluto','devuelve'} or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+            nodos_instruccion += [self.__analizar_instruccion()]
+        
+        devuelve = self.__analizar_devuelve()
+        self.__verificar('final_funcion')
+        
+        nodo = NodoFuncion(patrametros,nodos_instruccion,devuelve)
+
+        return nodo
+
+
+    def __analizar_parametros(self):
+        """
+        Parametros ::= "recibe"  (Parametro (" ")?)+
+        """
+        self.__verificar('recibe')
+        nodos_parametro = []
+        while self.componente_actual != 'inicio_funcion':
+            nodos_parametro+= [self.__analizar_parametro()]
+
+        return nodos_parametro
+        
+
+    def __analizar_parametro(self):
+        """
+        Parametro ::= Tipo Identificador
+        """
+        tipo = self.__verificar_tipo_dato()
+        identificador = self.__verificar_identificador()
+        nodo = NodoParametro(tipo,identificador)
+
+        return nodo
+
+
+    def __analizar_devuelve(self):
+        """
+        Devuelve ::= "devuelve" (Valor)?
+        """
+        self.__verificar('devuelve')
+        if self.componente_actual.tipo in {TipoComponente.IDENTIFICADOR,TipoComponente.NUMERO,TipoComponente.FLOTANTE,TipoComponente.TEXTO,TipoComponente.BOOLEANO}:
+            valor = self.__analizar_valor()
+            nodo = NodoDevuelve(valor)
+
+        return nodo
 
     def __verificar_numero(self):
         """
@@ -506,6 +588,21 @@ class Analizador:
         self.__siguiente_componente()
 
         return nodo
+
+    def __verificar_tipo_dato(self):
+        """
+        Tipo ::= ("numerico" | "flotante" | "texto" | "bool")
+        """
+
+        if self.componente_actual.texto  not in {'numerico' , 'flotante' , 'texto' , 'bool'}:
+            """
+            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un booleano
+            """
+        
+
+        self.__siguiente_componente()
+
+        return self.componente_actual.texto
 
     def __verificar_identificador(self):
         """
