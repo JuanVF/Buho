@@ -7,7 +7,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
-    NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro
+    NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, NodoOperacionAritmetica, \
+    NodoOperacionLogica
+
+
+from operandosAritmeticos import OperandosAritmeticos
+from operandosLogicos import OperandosLogicos
 
 
 class Analizador:
@@ -123,16 +128,53 @@ class Analizador:
     def __analizar_operador_aritmetico(self):
         """
         OperadoresAritmeticos ::=  ("mas" | "menos" | "por" | "entre" | "residuo" | "elevado" | "modulo" )
-        TODO: Implementar esto
         """
-        pass
+        opciones = {
+            "mas" : OperandosAritmeticos.MAS,
+            "menos" : OperandosAritmeticos.MENOS,
+            "por" : OperandosAritmeticos.POR,
+            "entre" : OperandosAritmeticos.ENTRE,
+            "residuo" : OperandosAritmeticos.RESIDUO,
+            "elevado" : OperandosAritmeticos.ELEVADO,
+            "modulo" : OperandosAritmeticos.MODULO
+        }
+        
+
+        if self.componente_actual.texto not in opciones:
+            return NodoError("Error con el componente " + self.componente_actual.texto,
+                              self.componente_actual.fila, self.componente_actual.columna,
+                              "Debe ser un valor entre \"mas\" | \"menos\" | \"por\" | \"entre\" | \"residuo\" | \"elevado\" | \"modulo\"")
+
+        operador = opciones[self.componente_actual.texto]
+
+        return NodoOperacionAritmetica(operador)
 
     def __analizar_operador_logico(self):
         """
         OperadoresLogicos ::= ("menor" | "mayor" | "menor_igual" | "mayor_igual" | "diferente" | "igual" | "y" | "o" | "no")
-        TODO: Implementar esto
         """
-        pass
+        opciones = {
+            "menor" : OperandosLogicos.MENOR,
+            "mayor" : OperandosLogicos.MAYOR,
+            "menor_igual" : OperandosLogicos.MENOR_IGUAL,
+            "mayor_igual" : OperandosLogicos.MAYOR_IGUAL,
+            "diferente" : OperandosLogicos.DIFERENTE,
+            "igual" : OperandosLogicos.IGUAL,
+            "y" : OperandosLogicos.Y,
+            "o" : OperandosLogicos.O,
+            "no" : OperandosLogicos.NO
+        }
+        
+
+        if self.componente_actual.texto not in opciones:
+            return NodoError("Error con el componente " + self.componente_actual.texto,
+                              self.componente_actual.fila, self.componente_actual.columna,
+                              "Debe ser un valor entre \"mas\" | \"menos\" | \"por\" | \"entre\" | \"residuo\" | \"elevado\" | \"modulo\"")
+
+
+        operador = opciones[self.componente_actual.texto]
+
+        return NodoOperacionLogica(operador)
 
     def __analizar_valor(self):
         """
