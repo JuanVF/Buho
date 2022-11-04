@@ -4,13 +4,43 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
+from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol
 
 class Analizador:
     componentes_lexicos : list
     cantidad_componentes : int
     posicion_componente_actual : int
     componente_actual : ComponenteLéxico
+
+    def __init__(self, lista_componentes):
+
+        self.componentes_lexicos = lista_componentes
+        self.cantidad_componentes = len(lista_componentes)
+
+        self.posicion_componente_actual = 0
+        self.componente_actual = lista_componentes[0]
+
+        self.asa = Arbol()
+
+    def imprimir_asa(self):
+        """
+        Imprime el árbol de sintáxis abstracta
+        """
+            
+        if self.asa.raiz is None:
+            print([])
+        else:
+            self.asa.imprimir_preorden()
+
+
+    def analizar(self):
+        """
+        Método principal que inicia el análisis siguiendo el esquema de
+        análisis por descenso recursivo
+        """
+        #self.asa.raiz = self.__analizar_programa() TODO
+        return
+
 
     def __analizar_expresion(self):
         """
