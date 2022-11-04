@@ -4,7 +4,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoDesde, NodoDormir, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
+from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
 
 class Analizador:
     componentes_lexicos : list
@@ -93,7 +93,10 @@ class Analizador:
         """
         @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un valor
         """
-        pass
+        nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+        "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+        "Debe ser un valor entre Identificador | Numero | Flotante | Texto | Booleano | Aleatorio")
+        return nodoError
 
     def __analizar_aleatorio(self):
         """
@@ -217,7 +220,10 @@ class Analizador:
             """
             Aqui se deberia levantar una Excepcion de que no se esta respetando el string de la gramatica
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "recibir_entrada debe tener con_comentario un Booleano o Numero o Texto o un sin_comentario o bien seguido de un guardar_en ")
+            return nodoError
 
         # Entra en juego Guardar_en
         self.__verificar('guardar_en') #Palabra reservada
@@ -236,7 +242,7 @@ class Analizador:
         self.__verificar('si') #Palabra reservada
         # condicion =
         self.__verificar('inicio_si') #Palabra reservada
-        # instrucciones = self.__verificar_instrucciones()
+        instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_si') #Palabra reservada
         self.__verificar('\n') #Palabra reservada
 
@@ -245,7 +251,7 @@ class Analizador:
         #De la siguiente manera se implementan los "0 o 1 repetición" (?):
 
         if self.componente_actual.texto == 'sino':
-            # instrucciones_sino = self.__verificar_instrucciones()
+            instrucciones_sino = self.__analizar_instrucciones()
             sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
 
@@ -260,7 +266,7 @@ class Analizador:
         self.__verificar('mientras') #Palabra reservada
         # condicion =
         self.__verificar('inicia_mientras') #Palabra reservada
-        # instrucciones = self.__verificar_instrucciones()
+        instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_mientras') #Palabra reservada
 
         return NodoMientras(condicion, instrucciones)
@@ -275,10 +281,52 @@ class Analizador:
         finalrango = self.__verificar_numero()
         self.__verificar('inicia_desde')
 
-        # instrucciones = self.__verificar_instrucciones()
+        instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_desde')
 
         return NodoDesde(iniciorango, finalrango, instrucciones)
+
+    
+
+    def __analizar_instrucciones(self):
+        """
+            Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
+            Comentario no se lee ya que es excluido desde el explorador. 
+            AccesoDatosComplejos tambien se excluyó
+        """
+        nodos_nuevos = []
+        while(True):
+
+            if self.componente_actual.tipo == TipoComponente.TIPO:
+                nodos_nuevos += [self.__analizar_declaracion()]
+
+            elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+                nodos_nuevos += [self.__analizar_expresion()]
+
+            elif self.componente_actual.texto in ['escribir','recibir_entrada','si','mientras','desde','dormir','valor_absoluto']:
+                nodos_nuevos += [self.__analizar_operando()]
+
+            elif self.componente_actual.texto == 'devuelve':
+                nodos_nuevos += [self.__analizar_devuelve()] #pendiente
+
+            else:                
+                break
+        
+        if nodos_nuevos == []:
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+            return nodoError
+        return nodos_nuevos
+
+    def __analizar_declaracion(self):
+        """
+            DeclaracionComun ::= Tipo Expresion "\n"
+        """
+        tipo = self.componente_actual.texto
+        expresion = self.__analizar_expresion()
+        return NodoDeclaracionComun(tipo,expresion)
+
 
     def __analizar_Dormir(self):
         """
@@ -307,7 +355,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un numero
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "Debe ser un valor numerico")
+            return nodoError
 
         nodo = NodoNumero(self.componente_actual.texto)
 
@@ -323,7 +374,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un flotante
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "Debe ser un valor flotante")
+            return nodoError
 
         nodo = NodoFlotante(self.componente_actual.texto)
 
@@ -339,7 +393,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un texto
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "Debe ser un valor de tipo texto")
+            return nodoError
 
         nodo = NodoTexto(self.componente_actual.texto)
 
@@ -355,7 +412,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un booleano
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "Debe ser un valor booleano")
+            return nodoError
 
         results = {
             "verdadero": True,
@@ -381,7 +441,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un identificador
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "Hace falta un identificador")
+            return nodoError
 
         nodo = NodoIdentificador(self.componente_actual.texto)
 
@@ -397,7 +460,10 @@ class Analizador:
             """
             @Kaled Aqui se deberia levantar una Excepcion de sintaxis incorrecta
             """
-            pass
+            nodoError = NodoError("Error con el componente "+self.componente_actual.texto+"\n",
+            "Encontrado en la fila "+self.componente_actual.fila,", columna: "+self.componente_actual.columna,
+            "El componente "+texto+" no es reconocido.")
+            return nodoError
 
         self.__siguiente_componente()
 
