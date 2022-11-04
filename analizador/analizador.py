@@ -4,7 +4,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
+from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto
 
 class Analizador:
     componentes_lexicos : list
@@ -318,6 +318,19 @@ class Analizador:
             "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
             return nodoError
         return nodos_nuevos
+
+    def __analizar_devuelve(self):
+        """
+        Devuelve ::= "devuelve" (Valor)
+        """
+        
+        self.__verificar('devuelve')
+        self.__verificar('(')
+        valor = self.__analizar_valor()
+        self.__verificar(')')
+
+        nodo = NodoDevuelve(valor)
+        return nodo
 
     def __analizar_declaracion(self):
         """
