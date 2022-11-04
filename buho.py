@@ -3,6 +3,7 @@ import sys
 from logger import bcolors, log_error
 from ayuda import help, version
 from explorador.explorador import invocar_explorador
+from analizador.analizador import invocar_analizador
 
 """
     Opciones de ejecución para el lenguaje buho
@@ -14,7 +15,9 @@ opciones = {
     "-version": version,
     "-v": version,
     "-e": invocar_explorador,
-    "-explorar": invocar_explorador
+    "-a": invocar_analizador,
+    "-explorar": invocar_explorador,
+    "-analizar": invocar_analizador
 }
 
 """
