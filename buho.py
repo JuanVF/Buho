@@ -64,4 +64,6 @@ def main():
             sys.exit(1)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    archivo = leer_archivo("C:\Pycharm\Proyectos\Buho\documentacion\Entregable 2 - Explorador\Tests\flotantes.bh" )
+    invocar_analizador(archivo)

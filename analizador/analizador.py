@@ -58,7 +58,7 @@ class Analizador:
         nodos_nuevos = []
         while True:
 
-            if self.componente_actual.tipo == TipoComponente.TIPO:
+            if self.componente_actual.texto in ["numerico", "flotante", "texto", "bool"]:
                 nodos_nuevos += [self.__analizar_declaracion()]
 
             elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
@@ -74,7 +74,7 @@ class Analizador:
                 if self.cantidad_componentes > self.posicion_componente_actual:
                     nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
                                   self.componente_actual.fila, self.componente_actual.columna,
-                                  "El componente " + self.componente_actual.texto + "no esta definido")]
+                                  "El componente " + self.componente_actual.texto + " no esta definido")]
                 else:
                     break
 
@@ -455,7 +455,7 @@ class Analizador:
             else:
                 nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
                                   self.componente_actual.fila, self.componente_actual.columna,
-                                  "El componente " + self.componente_actual.texto + "no esta definido")]
+                                  "El componente " + self.componente_actual.texto + " no esta definido")]
                 break
 
         if not nodos_nuevos:
