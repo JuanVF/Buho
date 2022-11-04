@@ -1,16 +1,20 @@
 # Analizador para el lenguaje Buho
 
 import os, sys
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from explorador.explorador import ComponenteLéxico, TipoComponente
-from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol
+from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
+from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
+    NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
+    NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro
+
 
 class Analizador:
-    componentes_lexicos : list
-    cantidad_componentes : int
-    posicion_componente_actual : int
-    componente_actual : ComponenteLéxico
+    componentes_lexicos: list
+    cantidad_componentes: int
+    posicion_componente_actual: int
+    componente_actual: ComponenteLéxico
 
     def __init__(self, lista_componentes):
 
@@ -26,21 +30,55 @@ class Analizador:
         """
         Imprime el árbol de sintáxis abstracta
         """
-            
+
         if self.asa.raiz is None:
             print([])
         else:
             self.asa.imprimir_preorden()
-
 
     def analizar(self):
         """
         Método principal que inicia el análisis siguiendo el esquema de
         análisis por descenso recursivo
         """
-        #self.asa.raiz = self.__analizar_programa() TODO
+        self.asa.raiz = self.__analizar_programa()
         return
 
+    def __analizar_programa(self):
+        """
+                    Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
+                    Comentario no se lee ya que es excluido desde el explorador.
+                    AccesoDatosComplejos tambien se excluyó
+                """
+        nodos_nuevos = []
+        while True:
+
+            if self.componente_actual.tipo == TipoComponente.TIPO:
+                nodos_nuevos += [self.__analizar_declaracion()]
+
+            elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+                nodos_nuevos += [self.__analizar_expresion()]
+
+            elif self.componente_actual.texto in ['escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
+                                                  'valor_absoluto']:
+                nodos_nuevos += [self.__analizar_operando()]
+
+            elif self.componente_actual.texto == 'funcion':
+                nodos_nuevos += [self.__analizar_funcion()]
+            else:
+                if self.cantidad_componentes > self.posicion_componente_actual:
+                    nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "El componente " + self.componente_actual.texto + "no esta definido")]
+                else:
+                    break
+
+        if not nodos_nuevos:
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+            return nodoError
+        return nodos_nuevos
 
     def __analizar_expresion(self):
         """
@@ -74,22 +112,22 @@ class Analizador:
 
         if es_aritmetico:
             operador = self.__analizar_operador_aritmetico()
-        
+
         if es_logico:
             operador = self.__analizar_operador_logico()
 
         segundo_valor = self.__analizar_valor()
 
-        return NodoOperacion(primer_valor, operacion, segundo_valor)
+        return NodoOperacion(primer_valor, operador, segundo_valor)
 
-    def __analizar_operacion_aritmetica(self):
+    def __analizar_operador_aritmetico(self):
         """
         OperadoresAritmeticos ::=  ("mas" | "menos" | "por" | "entre" | "residuo" | "elevado" | "modulo" )
         TODO: Implementar esto
-        """     
+        """
         pass
 
-    def __analizar_operacion_logica(self):
+    def __analizar_operador_logico(self):
         """
         OperadoresLogicos ::= ("menor" | "mayor" | "menor_igual" | "mayor_igual" | "diferente" | "igual" | "y" | "o" | "no")
         TODO: Implementar esto
@@ -123,9 +161,9 @@ class Analizador:
         """
         Error Sintáctico
         """
-        nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-        self.componente_actual.fila, self.componente_actual.columna,
-        "Debe ser un valor entre Identificador | Numero | Flotante | Texto | Booleano | Aleatorio")
+        nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                              self.componente_actual.fila, self.componente_actual.columna,
+                              "Debe ser un valor entre Identificador | Numero | Flotante | Texto | Booleano | Aleatorio")
         return nodoError
 
     def __analizar_aleatorio(self):
@@ -153,24 +191,22 @@ class Analizador:
         else:
             return NodoAleatorio()
 
-
-    def __analizar_operando(self):    
+    def __analizar_operando(self):
         """
         Operandos::= (Escribir | Recibir_entrada | Si | Mientras | Desde | Dormir | ValorAbsoluto)
 
         OJO! Por favor note que el nombre de la regla es igual a la palabra reservada,
              con la diferencia de que esta última empieza con minúscula.
-             En el momento de analizar el componente actual, se debe tomar 
+             En el momento de analizar el componente actual, se debe tomar
              en cuenta este aspecto para buscarlo adecuadamente (utilizando la palabra reservada)
-    
-        """
-        
-        nodos_nuevos = []  
 
-        
+        """
+
+        nodos_nuevos = []
+
         self.__verificar('(')
 
-        # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis. 
+        # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis.
         if self.componente_actual.texto == 'escribir':
             nodos_nuevos += [self.__analizar_escribir()]
 
@@ -190,15 +226,14 @@ class Analizador:
             nodos_nuevos += [self.__analizar_Dormir()]
 
         elif self.componente_actual.texto == 'valor_absoluto':
-            nodos_nuevos += [self.__analizar_ValorAbsoluto()]    
+            nodos_nuevos += [self.__analizar_ValorAbsoluto()]
 
-        else: #Reservado para manejar errores
-            nodos_nuevos += [self.__analizar_error()]
+        else:  # Reservado para manejar errores
+            pass
 
-        
         self.__verificar(')')
 
-        #return No vi tal cosa como NodoOperando, es NodoFuncion???
+        # return No vi tal cosa como NodoOperando, es NodoFuncion???
 
     def __analizar_escribir(self):
         """
@@ -206,10 +241,10 @@ class Analizador:
         """
 
         # Se empieza el análisis
-        self.__verificar('escribir') #Palabra reservada
+        self.__verificar('escribir')  # Palabra reservada
         self.__verificar('(')
-      
-        valor = self.__analizar_valor() # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica. 
+
+        valor = self.__analizar_valor()  # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica.
 
         self.__verificar(')')
 
@@ -218,15 +253,16 @@ class Analizador:
     def __analizar_recibir_entrada(self):
         """
         Recibir_entrada ::= "recibir_entrada" ("con_comentario" (Booleano | Numero | Texto) | "sin_comentario" ) Guardar_en
-        
+
         Guardar_en ::= "guardar_en" Identificador
         """
-        
-        # Se empieza el análisis de recibir_entrada
-        self.__verificar('recibir_entrada') #Palabra reservada
-        self.__verificar('(')
 
-        if self.__verificar('con_comentario'): 
+        # Se empieza el análisis de recibir_entrada
+        self.__verificar('recibir_entrada')  # Palabra reservada
+        self.__verificar('(')
+        comentario = ""
+
+        if self.__verificar('con_comentario'):
             # Revisar esto porque NO me estoy pasando el comentario por el quinto forro del pantalón
             # Sin embargo, es necesario verificar el string que es parte de la sintaxis
             # Además, el comentario es uno de los parámetros del NodoRecibirEntrada
@@ -234,15 +270,15 @@ class Analizador:
 
             if tipo == TipoComponente.BOOLEANO:
                 comentario = self.__verificar_booleano()
-                #pass
+                # pass
 
             if tipo == TipoComponente.NUMERO:
                 comentario = self.__verificar_numero()
-                #pass
+                # pass
 
             if tipo == TipoComponente.TEXTO:
                 comentario = self.__verificar_texto()
-                #pass
+                # pass
 
             self.__verificar(')')
 
@@ -253,13 +289,13 @@ class Analizador:
             """
             Aqui se deberia levantar una Excepcion de que no se esta respetando el string de la gramatica
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "recibir_entrada debe tener con_comentario un Booleano o Numero o Texto o un sin_comentario o bien seguido de un guardar_en ")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "recibir_entrada debe tener con_comentario un Booleano o Numero o Texto o un sin_comentario o bien seguido de un guardar_en ")
             return nodoError
 
         # Entra en juego Guardar_en
-        self.__verificar('guardar_en') #Palabra reservada
+        self.__verificar('guardar_en')  # Palabra reservada
         identificador_objetivo = self.__verificar_identificador()
 
         return NodoRecibirEntrada(comentario, identificador_objetivo)
@@ -267,40 +303,41 @@ class Analizador:
     def __analizar_si(self):
         """
         Si ::= "si" Condicion "inicio_si" Instruccion+ "final_si" ("\n" sino)?
-        
+
         Sino ::= "sino" Instruccion+ "final_sino"
         """
-        
+
         # Se empieza el análisis del Si
-        self.__verificar('si') #Palabra reservada
+        self.__verificar('si')  # Palabra reservada
         condicion = self.__analizar_condicion()
-        self.__verificar('inicio_si') #Palabra reservada
+        self.__verificar('inicio_si')  # Palabra reservada
         instrucciones = self.__analizar_instrucciones()
-        self.__verificar('final_si') #Palabra reservada
-        self.__verificar('\n') #Palabra reservada
+        self.__verificar('final_si')  # Palabra reservada
+        self.__verificar('\n')  # Palabra reservada
 
         # Aqui entra en juego el sino
 
-        #De la siguiente manera se implementan los "0 o 1 repetición" (?):
+        # De la siguiente manera se implementan los "0 o 1 repetición" (?):
 
+        sino = None
         if self.componente_actual.texto == 'sino':
             instrucciones_sino = self.__analizar_instrucciones()
             sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
 
-        return NodoSi(condicion, instrucciones, sino) # Preguntar por qué el sino no es opcional
+        return NodoSi(condicion, instrucciones, sino)  # Preguntar por qué el sino no es opcional
 
     def __analizar_mientras(self):
         """
         Mientras ::= "mientras" Condición "inicia_mientras" Instruccion+ "final_mientras"
         """
-        
+
         # Se empieza el análisis del mientras
-        self.__verificar('mientras') #Palabra reservada
+        self.__verificar('mientras')  # Palabra reservada
         condicion = self.__analizar_condicion()
-        self.__verificar('inicia_mientras') #Palabra reservada
+        self.__verificar('inicia_mientras')  # Palabra reservada
         instrucciones = self.__analizar_instrucciones()
-        self.__verificar('final_mientras') #Palabra reservada
+        self.__verificar('final_mientras')  # Palabra reservada
 
         return NodoMientras(condicion, instrucciones)
 
@@ -322,11 +359,11 @@ class Analizador:
     def __analizar_condicion(self):
         """
             Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
-            Comentario no se lee ya que es excluido desde el explorador. 
+            Comentario no se lee ya que es excluido desde el explorador.
             AccesoDatosComplejos tambien se excluyó
         """
         nodos_nuevos = []
-        while(True):
+        while (True):
 
             if self.componente_actual.tipo == TipoComponente.TIPO:
                 nodos_nuevos += [self.__analizar_declaracion()]
@@ -334,30 +371,31 @@ class Analizador:
             elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
                 nodos_nuevos += [self.__analizar_expresion()]
 
-            elif self.componente_actual.texto in ['escribir','recibir_entrada','si','mientras','desde','dormir','valor_absoluto']:
+            elif self.componente_actual.texto in ['escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
+                                                  'valor_absoluto']:
                 nodos_nuevos += [self.__analizar_operando()]
 
             elif self.componente_actual.texto == 'devuelve':
-                nodos_nuevos += [self.__analizar_devuelve()] #pendiente
+                nodos_nuevos += [self.__analizar_devuelve()]  # pendiente
 
-            else:                
+            else:
                 break
-        
-        if nodos_nuevos == []:
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+
+        if not nodos_nuevos:
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
             return nodoError
-        return nodos_nuevos    
+        return nodos_nuevos
 
     def __analizar_instrucciones(self):
         """
             Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
-            Comentario no se lee ya que es excluido desde el explorador. 
+            Comentario no se lee ya que es excluido desde el explorador.
             AccesoDatosComplejos tambien se excluyó
         """
         nodos_nuevos = []
-        while(True):
+        while True:
 
             if self.componente_actual.tipo == TipoComponente.TIPO:
                 nodos_nuevos += [self.__analizar_declaracion()]
@@ -365,34 +403,25 @@ class Analizador:
             elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
                 nodos_nuevos += [self.__analizar_expresion()]
 
-            elif self.componente_actual.texto in ['escribir','recibir_entrada','si','mientras','desde','dormir','valor_absoluto']:
+            elif self.componente_actual.texto in ['escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
+                                                  'valor_absoluto']:
                 nodos_nuevos += [self.__analizar_operando()]
 
             elif self.componente_actual.texto == 'devuelve':
-                nodos_nuevos += [self.__analizar_devuelve()] #pendiente
+                nodos_nuevos += [self.__analizar_devuelve()]  # pendiente
 
-            else:                
+            else:
+                nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "El componente " + self.componente_actual.texto + "no esta definido")]
                 break
-        
-        if nodos_nuevos == []:
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+
+        if not nodos_nuevos:
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
             return nodoError
         return nodos_nuevos
-
-    def __analizar_devuelve(self):
-        """
-        Devuelve ::= "devuelve" (Valor)
-        """
-        
-        self.__verificar('devuelve')
-        self.__verificar('(')
-        valor = self.__analizar_valor()
-        self.__verificar(')')
-
-        nodo = NodoDevuelve(valor)
-        return nodo
 
     def __analizar_declaracion(self):
         """
@@ -400,8 +429,7 @@ class Analizador:
         """
         tipo = self.componente_actual.texto
         expresion = self.__analizar_expresion()
-        return NodoDeclaracionComun(tipo,expresion)
-
+        return NodoDeclaracionComun(tipo, expresion)
 
     def __analizar_Dormir(self):
         """
@@ -412,7 +440,6 @@ class Analizador:
 
         return NodoDormir(tiempo)
 
-
     def __analizar_ValorAbsoluto(self):
         """
         ValorAbsoluto ::= "valor_absoluto" Numero
@@ -421,36 +448,39 @@ class Analizador:
         numero = self.__verificar_numero()
 
         return NodoValorAbsoluto(numero)
-    
+
     def __analizar_instruccion(self):
         """
         Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
         """
 
-        if self.componente_actual.texto in {'numerico' , 'flotante' , 'texto' , 'bool'}:
+        if self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool'}:
             instruccion = self.__analizar_declaracion()
 
         elif self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
             instruccion = self.__analizar_expresion()
 
-        elif self.componente_actual.texto in {'escribir' , 'recibir_entrada' , 'si' , 'mientras' , 'desde' , 'dormir' , 'valor_absoluto'}:
+        elif self.componente_actual.texto in {'escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
+                                              'valor_absoluto'}:
             instruccion = self.__analizar_operando()
 
         elif self.componente_actual.texto == 'devuelve':
             instruccion = self.__analizar_devuelve()
 
-        else: #Reservado para manejar errores
-            instruccion = self.__analizar_error()
+        else:  # Reservado para manejar errores
+            instruccion = [NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "El componente " + self.componente_actual.texto + "no esta definido")]
 
         return instruccion
 
-
     def __analizar_funcion(self):
         """
-        Funcion ::= "funcion" Identificador Parametros? "inicio_funcion" (Instruccion+)? Devuelve "final_funcion."      
+        Funcion ::= "funcion" Identificador Parametros? "inicio_funcion" (Instruccion+)? Devuelve "final_funcion."
         """
         self.__verificar('funcion')
         identificador = self.__verificar_identificador()
+        patrametros = None
         if self.componente_actual != 'recibe':
             patrametros = self.__analizar_parametros()
 
@@ -459,16 +489,17 @@ class Analizador:
         self.__verificar('inicio_funcion')
         nodos_instruccion += [self.__analizar_instruccion()]
 
-        while  self.componente_actual.texto in {'numerico' , 'flotante' , 'texto' , 'bool','escribir' , 'recibir_entrada' , 'si' , 'mientras' , 'desde' , 'dormir' , 'valor_absoluto','devuelve'} or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+        while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
+                                               'si', 'mientras', 'desde', 'dormir', 'valor_absoluto',
+                                               'devuelve'} or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
             nodos_instruccion += [self.__analizar_instruccion()]
-        
+
         devuelve = self.__analizar_devuelve()
         self.__verificar('final_funcion')
-        
-        nodo = NodoFuncion(patrametros,nodos_instruccion,devuelve)
+
+        nodo = NodoFuncion(patrametros, nodos_instruccion, devuelve)
 
         return nodo
-
 
     def __analizar_parametros(self):
         """
@@ -477,10 +508,9 @@ class Analizador:
         self.__verificar('recibe')
         nodos_parametro = []
         while self.componente_actual != 'inicio_funcion':
-            nodos_parametro+= [self.__analizar_parametro()]
+            nodos_parametro += [self.__analizar_parametro()]
 
         return nodos_parametro
-        
 
     def __analizar_parametro(self):
         """
@@ -488,17 +518,18 @@ class Analizador:
         """
         tipo = self.__verificar_tipo_dato()
         identificador = self.__verificar_identificador()
-        nodo = NodoParametro(tipo,identificador)
+        nodo = NodoParametro(tipo, identificador)
 
         return nodo
-
 
     def __analizar_devuelve(self):
         """
         Devuelve ::= "devuelve" (Valor)?
         """
         self.__verificar('devuelve')
-        if self.componente_actual.tipo in {TipoComponente.IDENTIFICADOR,TipoComponente.NUMERO,TipoComponente.FLOTANTE,TipoComponente.TEXTO,TipoComponente.BOOLEANO}:
+        nodo = None
+        if self.componente_actual.tipo in {TipoComponente.IDENTIFICADOR, TipoComponente.NUMERO, TipoComponente.FLOTANTE,
+                                           TipoComponente.TEXTO, TipoComponente.BOOLEANO}:
             valor = self.__analizar_valor()
             nodo = NodoDevuelve(valor)
 
@@ -512,9 +543,9 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "Debe ser un valor numerico")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "Debe ser un valor numerico")
             return nodoError
 
         nodo = NodoNumero(self.componente_actual.texto)
@@ -531,9 +562,9 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "Debe ser un valor flotante")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "Debe ser un valor flotante")
             return nodoError
 
         nodo = NodoFlotante(self.componente_actual.texto)
@@ -550,9 +581,9 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "Debe ser un valor de tipo texto")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "Debe ser un valor de tipo texto")
             return nodoError
 
         nodo = NodoTexto(self.componente_actual.texto)
@@ -569,9 +600,9 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "Debe ser un valor booleano")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "Debe ser un valor booleano")
             return nodoError
 
         results = {
@@ -594,11 +625,10 @@ class Analizador:
         Tipo ::= ("numerico" | "flotante" | "texto" | "bool")
         """
 
-        if self.componente_actual.texto  not in {'numerico' , 'flotante' , 'texto' , 'bool'}:
+        if self.componente_actual.texto not in {'numerico', 'flotante', 'texto', 'bool'}:
             """
             @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un booleano
             """
-        
 
         self.__siguiente_componente()
 
@@ -613,15 +643,15 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "Hace falta un identificador")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "Hace falta un identificador")
             return nodoError
 
         nodo = NodoIdentificador(self.componente_actual.texto)
 
         self.__siguiente_componente()
-        
+
         return nodo
 
     def __verificar(self, texto):
@@ -632,9 +662,9 @@ class Analizador:
             """
             Error Sintáctico
             """
-            nodoError = NodoError("Error con el componente "+self.componente_actual.texto,
-            self.componente_actual.fila, self.componente_actual.columna,
-            "El componente "+texto+" no es reconocido.")
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
+                                  self.componente_actual.fila, self.componente_actual.columna,
+                                  "El componente " + texto + " no es reconocido.")
             return nodoError
 
         self.__siguiente_componente()
@@ -648,5 +678,12 @@ class Analizador:
         if self.posicion_componente_actual >= self.cantidad_componentes:
             return
 
-        self.componente_actual = self.componentes_léxicos[self.posición_componente_actual]
+        self.componente_actual = self.componentes_lexicos[self.posicion_componente_actual]
 
+def invocar_analizador(contenido_archivo):
+        explorador = Explorador(contenido_archivo)
+        explorador.explorar()
+
+        analizador = Analizador(explorador.componentes)
+        analizador.analizar()
+        analizador.imprimir_asa()
