@@ -616,7 +616,7 @@ class Analizador:
         nodo = None
         if self.componente_actual.tipo in {TipoComponente.IDENTIFICADOR, TipoComponente.NUMERO, TipoComponente.FLOTANTE,
                                            TipoComponente.TEXTO, TipoComponente.BOOLEANO}:
-            valor = self.__analizar_valor()
+            valor = self.__analizar_operacion()
             nodo = NodoDevuelve(valor)
 
         return nodo

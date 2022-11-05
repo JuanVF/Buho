@@ -141,7 +141,7 @@ class Explorador:
                         (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto )'),
                         (TipoComponente.ALEATORIO, r'^(numerico_aletorio |de |a )'),
                         (TipoComponente.TIPO, r'^(numerico |flotante |texto |bool )'),
-                        (TipoComponente.LLAMADA, r'^(llamar | finalLlamada)'),
+                        (TipoComponente.LLAMADA, r'^(llamar |finalLlamada )'),
                         (TipoComponente.DECLARACION, r'^(tiene )'),
                         (TipoComponente.OPERADOR_ARITMETICO, r'^(mas |menos |por |entre |residuo |elevado |modulo )'),
                         (TipoComponente.OPERADOR_LOGICO, r'^(menor |mayor |menor_igual |mayor_igual |diferente |igual |y |o )'),
