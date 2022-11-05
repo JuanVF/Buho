@@ -279,7 +279,7 @@ class Analizador:
         elif self.componente_actual.texto == 'recibir_entrada':
             nodos_nuevos += [self.__analizar_recibir_entrada()]
 
-        elif self.componente_actual.texto == 'si':
+        elif self.componente_actual.texto == 'si' or self.componente_actual.texto == 'sino':
             nodos_nuevos += [self.__analizar_si()]
 
         elif self.componente_actual.texto == 'mientras':
@@ -327,7 +327,8 @@ class Analizador:
         
         comentario = ""
 
-        if self.__verificar('con_comentario'):
+        if self.componente_actual.texto == 'con_comentario':
+            self.__verificar('con_comentario')
             # Revisar esto porque NO me estoy pasando el comentario por el quinto forro del pantalón
             # Sin embargo, es necesario verificar el string que es parte de la sintaxis
             # Además, el comentario es uno de los parámetros del NodoRecibirEntrada
@@ -347,7 +348,8 @@ class Analizador:
 
             
 
-        elif self.__verificar('sin_comentario'):
+        elif self.componente_actual.texto == 'sin_comentario':
+            self.__verificar('sin_comentario')
             pass
 
         else:
@@ -385,6 +387,7 @@ class Analizador:
 
         sino = None
         if self.componente_actual.texto == 'sino':
+            self.__verificar('sino')  # Palabra reservada
             instrucciones_sino = self.__analizar_instrucciones()
             sino = NodoSino(instrucciones_sino)
         # no entrar en el if representa las 0 repeticiones
@@ -567,17 +570,25 @@ class Analizador:
         nodos_instruccion = []
 
         self.__verificar('inicio_funcion')
-        nodos_instruccion += [self.__analizar_instruccion()]
 
-        while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
-                                               'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
-                or self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+        devuelve = None
+
+        if self.componente_actual.texto != 'devuelve':
             nodos_instruccion += [self.__analizar_instruccion()]
 
-        devuelve = self.__analizar_devuelve()
-        self.__verificar('final_funcion')
+            while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
+                                                'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
+                    or self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+                nodos_instruccion += [self.__analizar_instruccion()]
 
-        nodo = NodoFuncion(patrametros, nodos_instruccion, devuelve)
+            devuelve = self.__analizar_devuelve()
+            self.__verificar('final_funcion')
+
+            nodo = NodoFuncion(identificador, patrametros, nodos_instruccion, devuelve)
+        else:
+            devuelve = self.__analizar_devuelve()
+
+            nodo = NodoFuncion(identificador, patrametros, nodos_instruccion, devuelve)
 
         return nodo
 
@@ -615,7 +626,7 @@ class Analizador:
         self.__verificar('devuelve')
         nodo = None
         if self.componente_actual.tipo in {TipoComponente.IDENTIFICADOR, TipoComponente.NUMERO, TipoComponente.FLOTANTE,
-                                           TipoComponente.TEXTO, TipoComponente.BOOLEANO}:
+                                           TipoComponente.TEXTO, TipoComponente.BOOLEANO, TipoComponente.LLAMADA}:
             valor = self.__analizar_operacion()
             nodo = NodoDevuelve(valor)
 

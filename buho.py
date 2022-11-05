@@ -65,5 +65,5 @@ def main():
 
 if __name__ == "__main__":
     #main()
-    archivo = leer_archivo("documentacion/Entregable 2 - Explorador/Tests/fibo.bh" )
+    archivo = leer_archivo("documentacion/Entregable 1 - Gramatica/Código de ejemplos/Ejemplo3.bh" )
     invocar_analizador(archivo)
