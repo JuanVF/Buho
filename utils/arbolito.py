@@ -539,6 +539,32 @@ Clase de nodo para el manejo de bucle "while" o mientras
  - condición: nodo condición, con la condición verdadera mientras se ejecute el ciclo
  - instrucciones: lista de nodoArbol con las instrucciones dentro de ese bloque
 """
+class NodoOperando(NodoArbol):
+    operandos: list
+
+    def __init__(self, operando=None, atributos=None):
+        super().__init__(atributos)
+        self.operando = operando
+
+    def __str__(self):
+        resultado = super().__str__()
+        resultado += self.imprimirAtt(self.operando)
+        resultado = resultado[:-1]
+
+        return resultado
+
+    def preorden(self, numT):
+        print(numT*"\t" + str(self))
+        print((numT+1)*"\t" + "operando")
+
+        for i in self.operando:
+            i.preorden(numT+1)
+
+"""
+Clase de nodo para el manejo de bucle "while" o mientras
+ - condición: nodo condición, con la condición verdadera mientras se ejecute el ciclo
+ - instrucciones: lista de nodoArbol con las instrucciones dentro de ese bloque
+"""
 class NodoMientras(NodoArbol):
     condicion: NodoOperacionLogica
     instrucciones: list

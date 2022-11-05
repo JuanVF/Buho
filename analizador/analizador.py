@@ -11,7 +11,7 @@ from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
-    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion
+    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando
 
 
 class Analizador:
@@ -82,6 +82,7 @@ class Analizador:
                                   self.componente_actual.fila, self.componente_actual.columna,
                                   "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
             return nodoError
+
         return NodoPrograma(nodos_nuevos)
 
     def __analizar_expresion(self):
@@ -295,9 +296,8 @@ class Analizador:
 
         else:  # Reservado para manejar errores
             pass
-
-        self.__verificar(')')
-
+        
+        return NodoOperando(nodos_nuevos)
         # return No vi tal cosa como NodoOperando, es NodoFuncion???
 
     def __analizar_escribir(self):
@@ -378,7 +378,6 @@ class Analizador:
         self.__verificar('inicio_si')  # Palabra reservada
         instrucciones = self.__analizar_instrucciones()
         self.__verificar('final_si')  # Palabra reservada
-        self.__verificar('\n')  # Palabra reservada
 
         # Aqui entra en juego el sino
 
@@ -428,7 +427,6 @@ class Analizador:
         comparaciones = [self.__analizar_comparacion()]
 
         while self.componente_actual.texto in ['y', 'o']:
-            self.__siguiente_componente()
             comparaciones += [self.__analizar_comparacion()]
 
         return NodoCondicion(comparaciones)
@@ -444,7 +442,6 @@ class Analizador:
 
         operando = self.__analizar_comparador()
 
-        self.__siguiente_componente()
         return NodoOperacionLogica(operado, operador, operando)
 
     def __analizar_comparador(self):
@@ -466,6 +463,7 @@ class Analizador:
                                   "Encontrado en la fila " + self.componente_actual.fila,
                                   ", columna: " + self.componente_actual.columna,
                                   "El comparador no es Identificador | Booleano | Numero | Flotante | Texto")
+            self.__siguiente_componente()
             return nodoError
 
     def __analizar_instrucciones(self):
@@ -489,7 +487,8 @@ class Analizador:
 
             elif self.componente_actual.texto == 'devuelve':
                 nodos_nuevos += [self.__analizar_devuelve()]  # pendiente
-
+            elif self.componente_actual.texto in {"final_si", "final_mientras"}:
+                break
             else:
                 nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
                                   self.componente_actual.fila, self.componente_actual.columna,
@@ -572,7 +571,7 @@ class Analizador:
 
         while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
                                                'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
-                or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+                or self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
             nodos_instruccion += [self.__analizar_instruccion()]
 
         devuelve = self.__analizar_devuelve()

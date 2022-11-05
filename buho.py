@@ -65,5 +65,5 @@ def main():
 
 if __name__ == "__main__":
     #main()
-    archivo = leer_archivo("C:\Pycharm\Proyectos\Buho\documentacion\Entregable 2 - Explorador\Tests\flotantes.bh" )
+    archivo = leer_archivo("documentacion/Entregable 2 - Explorador/Tests/fibo.bh" )
     invocar_analizador(archivo)
