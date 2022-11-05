@@ -64,6 +64,4 @@ def main():
             sys.exit(1)
 
 if __name__ == "__main__":
-    #main()
-    archivo = leer_archivo("documentacion/Entregable 1 - Gramatica/Código de ejemplos/Ejemplo3.bh" )
-    invocar_analizador(archivo)
+    main()

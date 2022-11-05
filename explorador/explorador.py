@@ -132,11 +132,11 @@ class Explorador:
     manejadorErrores = ManejadorErrores()
 
     regex_componentes=[ (TipoComponente.COMENTARIO, r'^//.*'),
-                        (TipoComponente.PALABRA_CLAVE, r'^(funcion |inicio_funcion |final_funcion|recibe |devuelve)'),
+                        (TipoComponente.PALABRA_CLAVE, r'^(funcion |inicio_funcion |final_funcion |recibe |devuelve)'),
                         (TipoComponente.ESCRITURA, r'^(escribir )'),
-                        (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada |guardar_en |con_comentario |sin_comentario|guardar_en )'),
-                        (TipoComponente.CONDICIONAL, r'^(si |inicio_si|final_si|sino |final_sino)'),
-                        (TipoComponente.REPETICION, r'^(mientras |inicia_mientras|final_mientas|desde |hasta |inicia_desde|final_desde)'),
+                        (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada |guardar_en |con_comentario |sin_comentario |guardar_en )'),
+                        (TipoComponente.CONDICIONAL, r'^(si |inicio_si |final_si |sino |final_sino )'),
+                        (TipoComponente.REPETICION, r'^(mientras |inicia_mientras |final_mientas |desde |hasta |inicia_desde |final_desde )'),
                         (TipoComponente.ESPERA, r'^(dormir )'),
                         (TipoComponente.VALOR_ABSOLUTO, r'^(valor_absoluto )'),
                         (TipoComponente.ALEATORIO, r'^(numerico_aletorio |de |a )'),
