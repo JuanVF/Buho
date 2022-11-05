@@ -76,8 +76,8 @@ class NodoError(NodoArbol):
 
     def __init__(self, error=None, linea=None, columna=None, sugerencia=None, atributos=None):
         super().__init__(atributos)
-        self.linea = linea
-        self.columna = columna
+        self.linea = str(linea)
+        self.columna = str(columna)
         self.tipoError = "Error sintáctico detectado en: "
         self.error = error
         self.sugerencia = sugerencia
@@ -283,25 +283,36 @@ Clase de nodo para las operaciones aritméticas
  - operando: nodo valor, identificador, llamada u operación aritmética que aplica la operación aritmética
 """
 class NodoOperacionAritmetica(NodoArbol):
+    operado: NodoArbol
     operador: OperandosAritmeticos
+    operando: NodoArbol
 
-    def __init__(self, operador=None, atributos=None):
+    def __init__(self, operado=None, operador=None, operando=None, atributos=None):
         super().__init__(atributos)
+        self.operado = operado
         self.operador = operador
+        self.operando = operando
 
     def __str__(self):
         resultado = super().__str__()
+        resultado += self.imprimirAtt(self.operado)
         resultado += self.imprimirAtt(self.operador)
+        resultado += self.imprimirAtt(self.operando)
         resultado = resultado[:-2]
 
         return resultado
 
     def preorden(self, numT):
         print(numT*"\t" + str(self))
-
+        if self.operado is not None:
+            print((numT+1)*"\t" + "operado")
+            self.operado.preorden(numT+1)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
             print(self.operador)
+        if self.operando is not None:
+            print((numT+1)*"\t" + "operando")
+            self.operando.preorden(numT+1)
 
 """
 Clase de nodo para las operaciones lógicas
@@ -310,25 +321,36 @@ Clase de nodo para las operaciones lógicas
  - operando: nodo valor, identificador, llamada u operación lógica que aplica la operación lógicas
 """
 class NodoOperacionLogica(NodoArbol):
+    operado: NodoArbol
     operador: OperandosLogicos
+    operando: NodoArbol
 
-    def __init__(self, operador=None, atributos=None):
+    def __init__(self, operado=None, operador=None, operando=None, atributos=None):
         super().__init__(atributos)
+        self.operado = operado
         self.operador = operador
+        self.operando = operando
 
     def __str__(self):
         resultado = super().__str__()
+        resultado += self.imprimirAtt(self.operado)
         resultado += self.imprimirAtt(self.operador)
+        resultado += self.imprimirAtt(self.operando)
         resultado = resultado[:-2]
 
         return resultado
 
     def preorden(self, numT):
         print(numT*"\t" + str(self))
-
+        if self.operado is not None:
+            print((numT+1)*"\t" + "operado")
+            self.operado.preorden(numT+1)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
             print(self.operador)
+        if self.operando is not None:
+            print((numT+1)*"\t" + "operando")
+            self.operando.preorden(numT+1)
 
 """
 Clase de nodo para las expresiones o asignación de valores a una variable
@@ -432,7 +454,7 @@ Clase de nodo para el manejo de condiciones en ciclos y bifurcaciones
  - condición: cualquier operación lógica que retorne un booleano
 """
 class NodoCondicion(NodoArbol):
-    condicion: NodoOperacionLogica
+    condicion: list
 
     def __init__(self, condicion=None, atributos=None):
         super().__init__(atributos)
@@ -448,8 +470,8 @@ class NodoCondicion(NodoArbol):
     def preorden(self, numT):
         print(numT*"\t" + str(self))
         if self.condicion is not None:
-            print((numT+1)*"\t" + "condicion")
-            self.condicion.preorden(numT+1)
+            print((numT+1)*"\t" + "condiciones")
+            self.preOrdenListNodos(self.condicion, numT+1)
 
 """
 Clase de nodo para el bloque alternativo de una bifurcación

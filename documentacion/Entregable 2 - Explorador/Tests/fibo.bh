@@ -4,8 +4,10 @@ funcion fibo recibe numerico n inicio_funcion
     devuelve n
   final_si
 
-  numerico n1 tiene llamar fibo recibe n menos 1
-  numerico n2 tiene llamar fibo recibe n menos 2
+  n tiene n menos 1
+  numerico n1 tiene llamar fibo recibe n finalLlamada
+  n tiene n menos 1
+  numerico n2 tiene llamar fibo recibe n finalLlamada
 
   devuelve n1 mas n2
 final_funcion

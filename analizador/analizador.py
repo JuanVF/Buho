@@ -11,7 +11,7 @@ from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
-    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma
+    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion
 
 
 class Analizador:
@@ -144,7 +144,7 @@ class Analizador:
                              "Debe ser un valor entre \"mas\" | \"menos\" | \"por\" | \"entre\" | \"residuo\" | \"elevado\" | \"modulo\"")
 
         operador = opciones[self.componente_actual.texto]
-
+        self.__siguiente_componente()
         return NodoOperacionAritmetica(operador)
 
     def __analizar_operador_logico(self):
@@ -169,6 +169,7 @@ class Analizador:
                              "Debe ser un valor entre \"mas\" | \"menos\" | \"por\" | \"entre\" | \"residuo\" | \"elevado\" | \"modulo\"")
 
         operador = opciones[self.componente_actual.texto]
+        self.__siguiente_componente()
 
         return NodoOperacionLogica(operador)
 
@@ -195,6 +196,8 @@ class Analizador:
 
         if tipo == TipoComponente.ALEATORIO:
             return self.__analizar_aleatorio()
+        if tipo == TipoComponente.LLAMADA:
+            return self.__analizar_llamada()
 
         """
         Error Sintáctico
@@ -203,6 +206,32 @@ class Analizador:
                               self.componente_actual.fila, self.componente_actual.columna,
                               "Debe ser un valor entre Identificador | Numero | Flotante | Texto | Booleano | Aleatorio")
         return nodoError
+
+    def __analizar_llamada(self):
+        """
+        Llamada ::= "llamar" Identificador ("recibe" Parametro+)?
+        """
+        self.__verificar('llamar')
+
+        identificador = self.__verificar_identificador()
+
+        parametros = None
+
+        if self.componente_actual.texto == 'recibe':
+            self.__verificar('recibe')
+
+            parametros = []
+
+            while True:
+                parametros += [self.__analizar_operacion()]
+
+                if self.componente_actual.texto == "finalLlamada":
+                    self.__siguiente_componente()
+                    break
+
+        nodo = NodoLlamada(identificador, parametros)
+
+        return nodo
 
     def __analizar_aleatorio(self):
         """
@@ -241,8 +270,6 @@ class Analizador:
         """
 
         nodos_nuevos = []
-
-        self.__verificar('(')
 
         # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis.
         if self.componente_actual.texto == 'escribir':
@@ -396,35 +423,50 @@ class Analizador:
 
     def __analizar_condicion(self):
         """
-            Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
-            Comentario no se lee ya que es excluido desde el explorador.
-            AccesoDatosComplejos tambien se excluyó
+        Condicion ::= Comparacion (("y" | "o")| Comparacion)?
         """
-        nodos_nuevos = []
-        while (True):
+        comparaciones = [self.__analizar_comparacion()]
 
-            if self.componente_actual.tipo == TipoComponente.TIPO:
-                nodos_nuevos += [self.__analizar_declaracion()]
+        while self.componente_actual.texto in ['y', 'o']:
+            self.__siguiente_componente()
+            comparaciones += [self.__analizar_comparacion()]
 
-            elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
-                nodos_nuevos += [self.__analizar_expresion()]
+        return NodoCondicion(comparaciones)
 
-            elif self.componente_actual.texto in ['escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
-                                                  'valor_absoluto']:
-                nodos_nuevos += [self.__analizar_operando()]
+    def __analizar_comparacion(self):
+        """
+        Comparacion ::= Comparador OperadoresLogicos Comparador
+        """
 
-            elif self.componente_actual.texto == 'devuelve':
-                nodos_nuevos += [self.__analizar_devuelve()]  # pendiente
+        operado = self.__analizar_comparador()
 
-            else:
-                break
+        operador = self.__analizar_operador_logico()
 
-        if not nodos_nuevos:
-            nodoError = NodoError("Error con el componente " + self.componente_actual.texto,
-                                  self.componente_actual.fila, self.componente_actual.columna,
-                                  "La instruccion no es valida en este bloque de intruccion, solo Declaracion | Expresion | Operandos | Devuelve ")
+        operando = self.__analizar_comparador()
+
+        self.__siguiente_componente()
+        return NodoOperacionLogica(operado, operador, operando)
+
+    def __analizar_comparador(self):
+        """
+        Comparador ::= (Identificador | Booleano | Numero | Flotante | Texto)
+        """
+        if self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
+            return self.__verificar_identificador()
+        elif self.componente_actual.tipo == TipoComponente.BOOLEANO:
+            return self.__verificar_booleano()
+        elif self.componente_actual.tipo == TipoComponente.NUMERO:
+            return self.__verificar_numero()
+        elif self.componente_actual.tipo == TipoComponente.FLOTANTE:
+            return self.__verificar_flotante()
+        elif self.componente_actual.tipo == TipoComponente.TEXTO:
+            return self.__verificar_texto()
+        else:
+            nodoError = NodoError("Error con el componente " + self.componente_actual.texto + "\n",
+                                  "Encontrado en la fila " + self.componente_actual.fila,
+                                  ", columna: " + self.componente_actual.columna,
+                                  "El comparador no es Identificador | Booleano | Numero | Flotante | Texto")
             return nodoError
-        return nodos_nuevos
 
     def __analizar_instrucciones(self):
         """
@@ -496,7 +538,7 @@ class Analizador:
         if self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool'}:
             instruccion = self.__analizar_declaracion()
 
-        elif self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+        elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
             instruccion = self.__analizar_expresion()
 
         elif self.componente_actual.texto in {'escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
@@ -520,7 +562,7 @@ class Analizador:
         self.__verificar('funcion')
         identificador = self.__verificar_identificador()
         patrametros = None
-        if self.componente_actual != 'recibe':
+        if self.componente_actual.texto == 'recibe':
             patrametros = self.__analizar_parametros()
 
         nodos_instruccion = []
@@ -529,8 +571,8 @@ class Analizador:
         nodos_instruccion += [self.__analizar_instruccion()]
 
         while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
-                                               'si', 'mientras', 'desde', 'dormir', 'valor_absoluto',
-                                               'devuelve'} or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
+                                               'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
+                or self.componente_actual.tipo != TipoComponente.IDENTIFICADOR:
             nodos_instruccion += [self.__analizar_instruccion()]
 
         devuelve = self.__analizar_devuelve()
@@ -546,7 +588,7 @@ class Analizador:
         """
         self.__verificar('recibe')
         nodos_parametro = []
-        while self.componente_actual != 'inicio_funcion':
+        while self.componente_actual.texto != 'inicio_funcion':
             nodos_parametro += [self.__analizar_parametro()]
 
         return nodos_parametro
@@ -555,9 +597,15 @@ class Analizador:
         """
         Parametro ::= Tipo Identificador
         """
+        preTipo = self.componente_actual.texto
         tipo = self.__verificar_tipo_dato()
         identificador = self.__verificar_identificador()
-        nodo = NodoParametro(tipo, identificador)
+        if tipo is None:
+            nodo = NodoError("Error con el componente " + preTipo,
+                              self.componente_actual.fila, self.componente_actual.columna,
+                              "Debe ser un tipo valido entre Numero | Flotante | Texto | Booleano ")
+        else:
+            nodo = NodoParametro(tipo, identificador)
 
         return nodo
 
@@ -665,13 +713,12 @@ class Analizador:
         """
 
         if self.componente_actual.texto not in {'numerico', 'flotante', 'texto', 'bool'}:
-            """
-            @Kaled Aqui se deberia levantar una Excepcion de que se esperaba un booleano
-            """
+            return None
 
+        tipo = self.componente_actual.texto
         self.__siguiente_componente()
 
-        return self.componente_actual.texto
+        return tipo
 
     def __verificar_identificador(self):
         """
