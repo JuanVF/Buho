@@ -307,11 +307,11 @@ class Analizador:
 
         # Se empieza el análisis
         self.__verificar('escribir')  # Palabra reservada
-        self.__verificar('(')
+        
 
         valor = self.__analizar_valor()  # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica.
 
-        self.__verificar(')')
+        
 
         return NodoEscribir(valor)
 
@@ -324,7 +324,7 @@ class Analizador:
 
         # Se empieza el análisis de recibir_entrada
         self.__verificar('recibir_entrada')  # Palabra reservada
-        self.__verificar('(')
+        
         comentario = ""
 
         if self.__verificar('con_comentario'):
@@ -345,7 +345,7 @@ class Analizador:
                 comentario = self.__verificar_texto()
                 # pass
 
-            self.__verificar(')')
+            
 
         elif self.__verificar('sin_comentario'):
             pass
