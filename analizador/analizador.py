@@ -56,7 +56,6 @@ class Analizador:
                 """
         nodos_nuevos = []
         while True:
-
             if self.componente_actual.texto in ["numerico", "flotante", "texto", "bool"]:
                 nodos_nuevos += [self.__analizar_declaracion()]
 
@@ -510,8 +509,7 @@ class Analizador:
         """
             DeclaracionComun ::= Tipo Expresion "\n"
         """
-        tipo = self.componente_actual.texto
-        self.__siguiente_componente()
+        tipo = self.__verificar_tipo_dato()
         expresion = self.__analizar_expresion()
         return NodoDeclaracionComun(tipo, expresion)
 
@@ -519,7 +517,7 @@ class Analizador:
         """
         Dormir ::= "dormir" Numero
         """
-        self.__verificar('desde')
+        self.__verificar('dormir')
         tiempo = self.__verificar_numero()
 
         return NodoDormir(tiempo)
@@ -780,6 +778,8 @@ class Analizador:
 def invocar_analizador(contenido_archivo):
         explorador = Explorador(contenido_archivo)
         explorador.explorar()
+
+        print(explorador.imprimir_componentes())
 
         analizador = Analizador(explorador.componentes)
         analizador.analizar()
