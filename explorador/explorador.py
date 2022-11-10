@@ -22,7 +22,6 @@ class ManejadorErrores:
         self.lineaStr = "En la línea número "
         self.columnaStr = "En la columna "
         self.componenteStr = "En el componente "
-        self.error: str
         self.msjAdicional: str
 
     # recibe el numero de linea que se debe analizar
@@ -37,29 +36,27 @@ class ManejadorErrores:
     def setcomponenteStr(self, numcomponente):
         self.componenteStr = self.componenteStr + str(numcomponente) + ". "
 
+    def setmsjadicional(self, error, msjAdiconal):
+        self.msjAdicional = str(error) + msjAdiconal
+
     # retorna el string con el mensaje de error si se encuentra
     def getMensajeError(self):
-        msj = self.error + f"""
+        msj = "...Error de escritura de componente detectado:" + f"""
         ******************************************** {bcolors.FAIL}Error encontrado{bcolors.ENDC} ****************************************************** 
         {bcolors.WARNING}\tUbicado en : """ + self.lineaStr + self.columnaStr + self.componenteStr + """\n\t\t...""" + self.msjAdicional + "..." + f"""{bcolors.ENDC}        
         ********************************************************************************************************************
         """
         return msj
 
-    # imprime el error para la revision del usuario
-    def imprimir_error_Str(self, componente):
-        self.error = "...Error de escritura de componente detectado:"
-        self.msjAdicional = str(componente) + " mal escrito."
-
-        print(self.getMensajeError())
-
     # son solo errores de saber si esta bien o mal escrito
     def manejar_errores(self, componentes):
         for componente in componentes:
-            if (componente.tipo == TipoComponente.ERROR):
+            if type(componente) == ComponenteError:
                 self.setcolumnaStr(componente.columna)
-                self.setcomponenteStr(componente.texto)
-                self.imprimir_error_Str(componente)
+                self.setlineaStr(componente.fila)
+                self.setcomponenteStr(componente.error)
+                self.setmsjadicional(componente.error, componente.msjAdicional)
+                print(self.getMensajeError())
 
 class TipoComponente(Enum):
     """
@@ -112,6 +109,20 @@ class ComponenteLéxico:
         Retorna una representación de texto con los atributos del componente lexico, con respecto al formato de python
         """
         resultado = f'{bcolors.OKCYAN}{self.tipo:30} {bcolors.OKGREEN}<{self.texto}> en {bcolors.WARNING}{self.fila}:{self.columna}{bcolors.ENDC}'
+        return resultado
+
+class ComponenteError:
+    def __init__(self, error: str, columna_nueva: int, fila_nueva: int, msjAdicional: str = " esta mal escrito"):
+        self.error = error
+        self.columna = columna_nueva
+        self.fila = fila_nueva
+        self.msjAdicional = msjAdicional
+
+    def __str__(self):
+        """
+        Retorna una representación de texto con los atributos del componente lexico, con respecto al formato de python
+        """
+        resultado = f'{bcolors.OKCYAN}{"ERROR":30} {bcolors.OKGREEN}<{self.error}> en {bcolors.WARNING}{self.fila}:{self.columna}{bcolors.ENDC}'
         return resultado
 
 class Explorador:
@@ -195,7 +206,11 @@ class Explorador:
         componentes = []
 
         sizeLinea = len(linea)
-        tokens = shlex.split(linea, posix=False)
+        try:
+            tokens = shlex.split(linea, posix=False)
+        except ValueError:
+            return [ComponenteError(linea, 0, index, " falta una comilla en una parte de la linea"), ]
+
         for token in tokens:
             error = True
             for tipo, patron in self.regex_componentes:
@@ -225,8 +240,7 @@ class Explorador:
             """
             if error:
                 # añade el componente de tipo error (se tiene que añadir Error al enum TipoComponente pero no a regex_componentes)
-                nuevo_componente = ComponenteLéxico(TipoComponente.ERROR, token,
-                                                    sizeLinea - len(token), index)
+                nuevo_componente = ComponenteError(token, sizeLinea - len(token), index)
                 componentes.append(nuevo_componente)
 
         return componentes
