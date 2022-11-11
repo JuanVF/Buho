@@ -50,10 +50,10 @@ class Analizador:
 
     def __analizar_programa(self):
         """
-                    Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
-                    Comentario no se lee ya que es excluido desde el explorador.
-                    AccesoDatosComplejos tambien se excluyó
-                """
+            Instruccion ::= (Declaracion | Expresion | Operandos | Devuelve)
+            Comentario no se lee ya que es excluido desde el explorador.
+            AccesoDatosComplejos tambien se excluyó
+        """
         nodos_nuevos = []
         while True:
             if self.componente_actual.texto in ["numerico", "flotante", "texto", "bool"]:
@@ -75,6 +75,9 @@ class Analizador:
                                   "El componente " + self.componente_actual.texto + " no esta definido")]
                 else:
                     break
+
+            if self.cantidad_componentes >= self.posicion_componente_actual + 1:
+                break
 
         if not nodos_nuevos:
             nodoError = NodoError("Error con el componente " + self.componente_actual.texto,

@@ -1,4 +1,3 @@
-// Fibonacci
 funcion fibo recibe numerico n inicio_funcion
   si n menor 2 inicio_si
     devuelve n
