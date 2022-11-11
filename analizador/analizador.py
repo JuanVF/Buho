@@ -491,9 +491,8 @@ class Analizador:
                 nodos_nuevos += [self.__analizar_operando()]
 
             elif self.componente_actual.texto == 'devuelve':
-                nodos_nuevos += [self.__analizar_devuelve()]  # pendiente
+                nodos_nuevos += [self.__analizar_devuelve()]
             elif self.componente_actual.texto in {"final_si", "final_mientras"}:
-                self.__siguiente_componente()
                 break
             else:
                 nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
