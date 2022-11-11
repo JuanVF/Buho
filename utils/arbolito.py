@@ -306,13 +306,13 @@ class NodoOperacionAritmetica(NodoArbol):
         print(numT*"\t" + str(self))
         if self.operado is not None:
             print((numT+1)*"\t" + "operado")
-            self.operado.preorden(numT+1)
+            self.operado.preorden(numT+2)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
             print((numT+2)*"\t" + str(self.operador))
         if self.operando is not None:
             print((numT+1)*"\t" + "operando")
-            self.operando.preorden(numT+1)
+            self.operando.preorden(numT+2)
 
 """
 Clase de nodo para las operaciones lógicas
@@ -344,13 +344,13 @@ class NodoOperacionLogica(NodoArbol):
         print(numT*"\t" + str(self))
         if self.operado is not None:
             print((numT+1)*"\t" + "operado")
-            self.operado.preorden(numT+1)
+            self.operado.preorden(numT+2)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
             print((numT+2)*"\t" + str(self.operador))
         if self.operando is not None:
             print((numT+1)*"\t" + "operando")
-            self.operando.preorden(numT+1)
+            self.operando.preorden(numT+2)
 
 """
 Clase de nodo para las expresiones o asignación de valores a una variable
