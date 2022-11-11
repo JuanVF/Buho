@@ -222,6 +222,8 @@ class Explorador:
                 entonces se guarda en la lista de componentes
                 """
                 if coincidencia is not None:
+                    if tipo == TipoComponente.COMENTARIO:
+                        return componentes
                     num_columna = sizeLinea - len(token)
                     """ 
                     algunos componentes (como los operadores logicos) requieren un espacio 
