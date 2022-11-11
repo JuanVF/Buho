@@ -309,7 +309,7 @@ class NodoOperacionAritmetica(NodoArbol):
             self.operado.preorden(numT+1)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
-            print(self.operador)
+            print((numT+2)*"\t" + str(self.operador))
         if self.operando is not None:
             print((numT+1)*"\t" + "operando")
             self.operando.preorden(numT+1)
@@ -347,7 +347,7 @@ class NodoOperacionLogica(NodoArbol):
             self.operado.preorden(numT+1)
         if self.operador is not None:
             print((numT+1)*"\t" + "operador")
-            print(self.operador)
+            print((numT+2)*"\t" + str(self.operador))
         if self.operando is not None:
             print((numT+1)*"\t" + "operando")
             self.operando.preorden(numT+1)
