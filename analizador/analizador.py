@@ -71,8 +71,8 @@ class Analizador:
             else:
                 if self.cantidad_componentes > self.posicion_componente_actual:
                     nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
-                                  self.componente_actual.fila, self.componente_actual.columna,
-                                  "El componente " + self.componente_actual.texto + " no esta definido")]
+                                               self.componente_actual.fila, self.componente_actual.columna,
+                                               "El componente " + self.componente_actual.texto + " no esta definido")]
                 else:
                     break
 
@@ -125,7 +125,10 @@ class Analizador:
 
         segundo_valor = self.__analizar_valor()
 
-        return NodoOperacion(primer_valor, operador, segundo_valor)
+        if es_logico:
+            return NodoOperacionLogica(primer_valor, operador, segundo_valor)
+
+        return NodoOperacionAritmetica(primer_valor, operador, segundo_valor)
 
     def __analizar_operador_aritmetico(self):
         """
@@ -148,7 +151,7 @@ class Analizador:
 
         operador = opciones[self.componente_actual.texto]
         self.__siguiente_componente()
-        return NodoOperacionAritmetica(operador)
+        return operador
 
     def __analizar_operador_logico(self):
         """
@@ -174,7 +177,7 @@ class Analizador:
         operador = opciones[self.componente_actual.texto]
         self.__siguiente_componente()
 
-        return NodoOperacionLogica(operador)
+        return operador
 
     def __analizar_valor(self):
         """
@@ -298,7 +301,7 @@ class Analizador:
 
         else:  # Reservado para manejar errores
             pass
-        
+
         return NodoOperando(nodos_nuevos)
         # return No vi tal cosa como NodoOperando, es NodoFuncion???
 
@@ -309,11 +312,8 @@ class Analizador:
 
         # Se empieza el análisis
         self.__verificar('escribir')  # Palabra reservada
-        
 
         valor = self.__analizar_valor()  # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica.
-
-        
 
         return NodoEscribir(valor)
 
@@ -326,7 +326,7 @@ class Analizador:
 
         # Se empieza el análisis de recibir_entrada
         self.__verificar('recibir_entrada')  # Palabra reservada
-        
+
         comentario = ""
 
         if self.componente_actual.texto == 'con_comentario':
@@ -348,7 +348,7 @@ class Analizador:
                 comentario = self.__verificar_texto()
                 # pass
 
-            
+
 
         elif self.componente_actual.texto == 'sin_comentario':
             self.__verificar('sin_comentario')
@@ -497,8 +497,8 @@ class Analizador:
                 break
             else:
                 nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
-                                  self.componente_actual.fila, self.componente_actual.columna,
-                                  "El componente " + self.componente_actual.texto + " no esta definido")]
+                                           self.componente_actual.fila, self.componente_actual.columna,
+                                           "El componente " + self.componente_actual.texto + " no esta definido")]
                 break
 
         if not nodos_nuevos:
@@ -554,8 +554,8 @@ class Analizador:
 
         else:  # Reservado para manejar errores
             instruccion = [NodoError("Error con el componente " + self.componente_actual.texto,
-                                  self.componente_actual.fila, self.componente_actual.columna,
-                                  "El componente " + self.componente_actual.texto + "no esta definido")]
+                                     self.componente_actual.fila, self.componente_actual.columna,
+                                     "El componente " + self.componente_actual.texto + "no esta definido")]
 
         return instruccion
 
@@ -579,7 +579,7 @@ class Analizador:
             nodos_instruccion += [self.__analizar_instruccion()]
 
             while self.componente_actual.texto in {'numerico', 'flotante', 'texto', 'bool', 'escribir', 'recibir_entrada',
-                                                'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
+                                                   'si', 'mientras', 'desde', 'dormir', 'valor_absoluto'} \
                     or self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
                 nodos_instruccion += [self.__analizar_instruccion()]
 
@@ -614,8 +614,8 @@ class Analizador:
         identificador = self.__verificar_identificador()
         if tipo is None:
             nodo = NodoError("Error con el componente " + preTipo,
-                              self.componente_actual.fila, self.componente_actual.columna,
-                              "Debe ser un tipo valido entre Numero | Flotante | Texto | Booleano ")
+                             self.componente_actual.fila, self.componente_actual.columna,
+                             "Debe ser un tipo valido entre Numero | Flotante | Texto | Booleano ")
         else:
             nodo = NodoParametro(tipo, identificador)
 
@@ -779,11 +779,11 @@ class Analizador:
         self.componente_actual = self.componentes_lexicos[self.posicion_componente_actual]
 
 def invocar_analizador(contenido_archivo):
-        explorador = Explorador(contenido_archivo)
-        explorador.explorar()
+    explorador = Explorador(contenido_archivo)
+    explorador.explorar()
 
-        print(explorador.imprimir_componentes())
+    explorador.imprimir_componentes()
 
-        analizador = Analizador(explorador.componentes)
-        analizador.analizar()
-        analizador.imprimir_asa()
+    analizador = Analizador(explorador.componentes)
+    analizador.analizar()
+    analizador.imprimir_asa()
