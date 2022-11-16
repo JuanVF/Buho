@@ -57,17 +57,17 @@ class Analizador:
         nodos_nuevos = []
         while True:
             if self.componente_actual.texto in ["numerico", "flotante", "texto", "bool"]:
-                nodos_nuevos += [self.__analizar_declaracion()]
+                nodos_nuevos += [self.__analizar_declaracion(), ]
 
             elif self.componente_actual.tipo == TipoComponente.IDENTIFICADOR:
-                nodos_nuevos += [self.__analizar_expresion()]
+                nodos_nuevos += [self.__analizar_expresion(), ]
 
             elif self.componente_actual.texto in ['escribir', 'recibir_entrada', 'si', 'mientras', 'desde', 'dormir',
                                                   'valor_absoluto']:
-                nodos_nuevos += [self.__analizar_operando()]
+                nodos_nuevos += [self.__analizar_operando(), ]
 
             elif self.componente_actual.texto == 'funcion':
-                nodos_nuevos += [self.__analizar_funcion()]
+                nodos_nuevos += [self.__analizar_funcion(), ]
             else:
                 if self.cantidad_componentes > self.posicion_componente_actual:
                     nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,
@@ -275,34 +275,32 @@ class Analizador:
 
         """
 
-        nodos_nuevos = []
-
         # Operandos a elegir, buscamos con minúscula porque así lo inidca la sintáxis.
         if self.componente_actual.texto == 'escribir':
-            nodos_nuevos += [self.__analizar_escribir()]
+            return self.__analizar_escribir()
 
         elif self.componente_actual.texto == 'recibir_entrada':
-            nodos_nuevos += [self.__analizar_recibir_entrada()]
+            return self.__analizar_recibir_entrada()
 
         elif self.componente_actual.texto == 'si' or self.componente_actual.texto == 'sino':
-            nodos_nuevos += [self.__analizar_si()]
+            return self.__analizar_si()
 
         elif self.componente_actual.texto == 'mientras':
-            nodos_nuevos += [self.__analizar_mientras()]
+             return self.__analizar_mientras()
 
         elif self.componente_actual.texto == 'desde':
-            nodos_nuevos += [self.__analizar_Desde()]
+            return self.__analizar_Desde()
 
         elif self.componente_actual.texto == 'dormir':
-            nodos_nuevos += [self.__analizar_Dormir()]
+            return self.__analizar_Dormir()
 
         elif self.componente_actual.texto == 'valor_absoluto':
-            nodos_nuevos += [self.__analizar_ValorAbsoluto()]
+            return self.__analizar_ValorAbsoluto()
 
-        else:  # Reservado para manejar errores
-            pass
-
-        return NodoOperando(nodos_nuevos)
+        # Reservado para manejar errores
+        return NodoError("Error con el componente " + self.componente_actual.texto,
+                             self.componente_actual.fila, self.componente_actual.columna,
+                             "El componente " + self.componente_actual.texto + " no es reconocido.")
         # return No vi tal cosa como NodoOperando, es NodoFuncion???
 
     def __analizar_escribir(self):
@@ -430,11 +428,17 @@ class Analizador:
         Condicion ::= Comparacion (("y" | "o")| Comparacion)?
         """
         comparaciones = [self.__analizar_comparacion()]
+        operadores = []
 
         while self.componente_actual.texto in ['y', 'o']:
+            if self.componente_actual.texto == 'y':
+                operadores += [OperandosLogicos.Y, ]
+            else:
+                operadores += [OperandosLogicos.O, ]
+            self.__siguiente_componente()
             comparaciones += [self.__analizar_comparacion()]
 
-        return NodoCondicion(comparaciones)
+        return NodoCondicion(comparaciones, operadores)
 
     def __analizar_comparacion(self):
         """
@@ -781,7 +785,7 @@ def invocar_analizador(contenido_archivo):
     explorador = Explorador(contenido_archivo)
     explorador.explorar()
 
-    explorador.imprimir_componentes()
+    #explorador.imprimir_componentes()
 
     analizador = Analizador(explorador.componentes)
     analizador.analizar()

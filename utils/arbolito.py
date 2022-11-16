@@ -127,6 +127,9 @@ class NodoPrograma(NodoArbol):
             print((numT+1)*"\t" + "instrucciones")
             self.preOrdenListNodos(self.nodos, numT+1)
 
+    def visitar(self, visitador):
+        return visitador.visitar_programa(self)
+
 """
 Clase de nodo general para el manejo de valores
  - tipo: el tipo de dato manejado. Ej: Texto, número, flotante o booleano
@@ -160,6 +163,9 @@ class NodoNumero(NodoValor):
         super().__init__(TipoDatos.NUMERO, valor, atributos)
         self.valor = valor
 
+    def visitar(self, visitador):
+        return visitador.visitar_numero(self)
+
 """
 Clase de nodo para el manejo de flotantes
  - valor: el flotante que se está manejando
@@ -170,6 +176,9 @@ class NodoFlotante(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.FLOTANTE, valor, atributos)
         self.valor = valor
+
+    def visitar(self, visitador):
+        return visitador.visitar_flotante(self)
 
 """
 Clase de nodo para el manejo de texto
@@ -182,6 +191,9 @@ class NodoTexto(NodoValor):
         super().__init__(TipoDatos.TEXTO, valor, atributos)
         self.valor = valor
 
+    def visitar(self, visitador):
+        return visitador.visitar_texto(self)
+
 """
 Clase de nodo para el manejo de booleanos
  - valor: verdadero o falso que se está manejando
@@ -192,6 +204,9 @@ class NodoBooleano(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.BOOLEANO, valor, atributos)
         self.valor = valor
+
+    def visitar(self, visitador):
+        return visitador.visitar_booleano(self)
 
 """
 Clase de nodo para el manejo de identificadores
@@ -210,6 +225,9 @@ class NodoIdentificador(NodoArbol):
         resultado = resultado[:-2]
 
         return resultado
+
+    def visitar(self, visitador):
+        return visitador.visitar_identificador(self)
 
 """
 Clase de nodo para la llamada a funciones
@@ -239,6 +257,9 @@ class NodoLlamada(NodoArbol):
         if self.params is not None:
             print((numT+1)*"\t" + "parametros")
             self.preOrdenListNodos(self.params, numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_llamada(self)
 
 """
 Clase de nodo para las operaciones
@@ -314,6 +335,9 @@ class NodoOperacionAritmetica(NodoArbol):
             print((numT+1)*"\t" + "operando")
             self.operando.preorden(numT+2)
 
+    def visitar(self, visitador):
+        return visitador.visitar_operacion_aritmetica(self)
+
 """
 Clase de nodo para las operaciones lógicas
  - operado: nodo valor, identificador, llamada u operación lógica al que se le aplicara la operación lógicas
@@ -352,6 +376,9 @@ class NodoOperacionLogica(NodoArbol):
             print((numT+1)*"\t" + "operando")
             self.operando.preorden(numT+2)
 
+    def visitar(self, visitador):
+        return visitador.visitar_operacion_logica(self)
+
 """
 Clase de nodo para las expresiones o asignación de valores a una variable
  - identificador: nodo identificador al que se le asigna los datos
@@ -380,6 +407,9 @@ class NodoExpresion(NodoArbol):
             print((numT+1)*"\t" + "indentificador")
             self.identificador.preorden(numT+1)
 
+    def visitar(self, visitador):
+        return visitador.visitar_expresion(self)
+
 """
 Clase de nodo para las declaraciones de tipo simple
  - tipo: tipo de dato que se le asignara a la variable (Texto, bool, número, float)
@@ -402,6 +432,9 @@ class NodoDeclaracionComun(NodoArbol):
 
         return resultado
 
+    def visitar(self, visitador):
+        return visitador.visitar_declaracion_comun(self)
+
 """
 Clase de nodo para la escritura en la línea de comando
  - valor: nodo identificador, valor, operación o llamada que se desea escribir
@@ -419,6 +452,9 @@ class NodoEscribir(NodoArbol):
         resultado = resultado[:-2]
 
         return resultado
+
+    def visitar(self, visitador):
+        return visitador.visitar_escribir(self)
 
 """
 Clase de nodo para la entrada de datos simple en la línea de comando
@@ -449,20 +485,26 @@ class NodoRecibirEntrada(NodoArbol):
             print((numT+1)*"\t" + "identificadorObj")
             self.identificadorObjetivo.preorden(numT+1)
 
+    def visitar(self, visitador):
+        return visitador.visitar_recibir_entrada(self)
+
 """
 Clase de nodo para el manejo de condiciones en ciclos y bifurcaciones
  - condición: cualquier operación lógica que retorne un booleano
 """
 class NodoCondicion(NodoArbol):
-    condicion: list
+    condicion : list
+    operadores : list
 
-    def __init__(self, condicion=None, atributos=None):
+    def __init__(self, condicion=None, operadores = None, atributos=None):
         super().__init__(atributos)
         self.condicion = condicion
+        self.operadores = operadores
 
     def __str__(self):
         resultado = super().__str__()
         resultado += self.imprimirAtt(self.condicion)
+        resultado += self.imprimirAtt(self.operadores)
         resultado = resultado[:-2]
 
         return resultado
@@ -472,6 +514,12 @@ class NodoCondicion(NodoArbol):
         if self.condicion is not None:
             print((numT+1)*"\t" + "condiciones")
             self.preOrdenListNodos(self.condicion, numT+1)
+        if self.operadores is not None:
+            print((numT+1)*"\t" + "operadores")
+            print((numT+2)*"\t" + str(self.operadores))
+
+    def visitar(self, visitador):
+        return visitador.visitar_condicion(self)
 
 """
 Clase de nodo para el bloque alternativo de una bifurcación
@@ -496,6 +544,9 @@ class NodoSino(NodoArbol):
         if self.instrucciones is not None:
             print((numT+1)*"\t" + "instrucciones")
             self.preOrdenListNodos(self.instrucciones, numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_sino(self)
 
 """
 Clase de nodo para el manejo de bifurcaciones
@@ -534,6 +585,9 @@ class NodoSi(NodoArbol):
             print((numT+1)*"\t" + "sino")
             self.sino.preorden(numT+1)
 
+    def visitar(self, visitador):
+        return visitador.visitar_si(self)
+
 """
 Clase de nodo para el manejo de bucle "while" o mientras
  - condición: nodo condición, con la condición verdadera mientras se ejecute el ciclo
@@ -559,6 +613,9 @@ class NodoOperando(NodoArbol):
 
         for i in self.operando:
             i.preorden(numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_operando(self)
 
 """
 Clase de nodo para el manejo de bucle "while" o mientras
@@ -589,6 +646,9 @@ class NodoMientras(NodoArbol):
         if self.instrucciones is not None:
             print((numT+1)*"\t" + "instrucciones")
             self.preOrdenListNodos(self.instrucciones, numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_mientras(self)
 
 """
 Clase de nodo para el manejo de bucle "for" o desde
@@ -622,6 +682,9 @@ class NodoDesde(NodoArbol):
             print((numT+1)*"\t" + "instrucciones")
             self.preOrdenListNodos(self.instrucciones, numT+1)
 
+    def visitar(self, visitador):
+        return visitador.visitar_desde(self)
+
 """
 Clase de nodo para la función de ambiente general aleatorio
  - inicioRango: inicio del rango para el número aleatorio, puede ser None
@@ -644,6 +707,9 @@ class NodoAleatorio(NodoArbol):
 
         return resultado
 
+    def visitar(self, visitador):
+        return visitador.visitar_aleatorio(self)
+
 """
 Clase de nodo para la función de ambiente general aleatorio
  - tiempo: número positivo por el cual se pausara temporalmente el hilo
@@ -662,6 +728,9 @@ class NodoDormir(NodoArbol):
 
         return resultado
 
+    def visitar(self, visitador):
+        return visitador.visitar_dormir(self)
+
 """
 Clase de nodo para la función de ambiente general absoluto
  - número: número al cual se le aplicara la función de absoluto (|x| = x or |-x| = x)
@@ -679,6 +748,9 @@ class NodoValorAbsoluto(NodoArbol):
         resultado = resultado[:-2]
 
         return resultado
+
+    def visitar(self, visitador):
+        return visitador.visitar_valor_absoluto(self)
 
 """
 Clase de nodo para la declaración de parámetros dentro de una función
@@ -701,6 +773,9 @@ class NodoParametro(NodoArbol):
         resultado = resultado[:-2]
 
         return resultado
+
+    def visitar(self, visitador):
+        return visitador.visitar_parametro(self)
 
 """
 Clase de nodo para la devolución de valores al final de una función
@@ -725,6 +800,9 @@ class NodoDevuelve(NodoArbol):
         if self.valor is not None:
             print((numT+1)*"\t" + "valor")
             self.valor.preorden(numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_devuelve(self)
 
 """
 Clase de nodo para la declaración de funciones
@@ -770,6 +848,9 @@ class NodoFuncion(NodoArbol):
         if self.devuelve is not None:
             print((numT+1)*"\t" + "devuelve")
             self.devuelve.preorden(numT+1)
+
+    def visitar(self, visitador):
+        return visitador.visitar_funcion(self)
 
 class Arbol:
     raiz: NodoArbol
