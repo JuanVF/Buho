@@ -4,6 +4,8 @@ from logger import bcolors, log_error
 from ayuda import help, version
 from explorador.explorador import invocar_explorador
 from analizador.analizador import invocar_analizador
+from verificador.verificador import invocar_verificador
+from generador.generador import invocar_generador
 
 """
     Opciones de ejecución para el lenguaje buho
@@ -13,11 +15,15 @@ opciones = {
     "-help": help,
     "-ayuda": help,
     "-version": version,
-    "-v": version,
+    "-ver": version,
     "-e": invocar_explorador,
     "-a": invocar_analizador,
+    "-v": invocar_verificador,
+    "-g": invocar_generador,
     "-explorar": invocar_explorador,
-    "-analizar": invocar_analizador
+    "-analizar": invocar_analizador,
+    "-verificar": invocar_verificador,
+    "-generar": invocar_generador
 }
 
 """

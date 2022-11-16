@@ -790,3 +790,5 @@ def invocar_analizador(contenido_archivo):
     analizador = Analizador(explorador.componentes)
     analizador.analizar()
     analizador.imprimir_asa()
+    
+    return analizador.asa

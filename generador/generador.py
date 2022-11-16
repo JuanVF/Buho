@@ -50,3 +50,10 @@ def valorAbsoluto(x):
         print(self.ambiente_estandar)
         print(resultado)
 
+def invocar_generador(contenido_archivo):
+    asa = invocar_verificador(contenido_archivo)
+
+    generador = Generador(asa)
+    generador.generar()
+    #generador.imprimir_asa()
+
