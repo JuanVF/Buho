@@ -2,6 +2,7 @@
 
 from utils.arbolito import Arbol, NodoArbol
 from visitadores import VisitantePython
+from verificador.verificador import invocar_verificador
 
 
 class Generador:
@@ -56,4 +57,3 @@ def invocar_generador(contenido_archivo):
     generador = Generador(asa)
     generador.generar()
     #generador.imprimir_asa()
-
