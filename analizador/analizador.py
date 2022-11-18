@@ -75,7 +75,7 @@ class Analizador:
                 else:
                     break
 
-            if self.cantidad_componentes >= self.posicion_componente_actual + 1:
+            if self.cantidad_componentes <= self.posicion_componente_actual + 1:
                 break
 
         if not nodos_nuevos:
@@ -389,6 +389,7 @@ class Analizador:
             self.__verificar('sino')  # Palabra reservada
             instrucciones_sino = self.__analizar_instrucciones()
             sino = NodoSino(instrucciones_sino)
+            self.__verificar('final_sino')
         # no entrar en el if representa las 0 repeticiones
 
         return NodoSi(condicion, instrucciones, sino)  # Preguntar por qué el sino no es opcional
@@ -495,7 +496,7 @@ class Analizador:
 
             elif self.componente_actual.texto == 'devuelve':
                 nodos_nuevos += [self.__analizar_devuelve()]
-            elif self.componente_actual.texto in {"final_si", "final_mientras"}:
+            elif self.componente_actual.texto in {"final_si", "final_mientras", "final_desde", "final_sino"}:
                 break
             else:
                 nodos_nuevos += [NodoError("Error con el componente " + self.componente_actual.texto,

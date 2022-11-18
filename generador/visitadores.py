@@ -1,4 +1,4 @@
-# Implementa el veficador de ciruelas
+# Implementa el visitador del generador de buho
 
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
@@ -20,105 +20,10 @@ nodos eliminados:
 """
 class VisitantePython:
     tabuladores = 0
-    
-    def visitar(self, nodo):
-        """
-        Este método es necesario por que uso un solo tipo de nodo para
-        todas las partes del árbol por facilidad... pero cómo lo hice
-        tuanis allá... pues bueno... acá hay que pagar el costo.
-        """
-
-        resultado = nodo.visitar(self)
-
-        """if type(nodo) is NodoPrograma:
-            resultado = self.visitar_programa(nodo)
-
-        elif type(nodo) is TipoNodo.ASIGNACIÓN:
-            resultado = self.visitar_asignación(nodo)
-
-        elif type(nodo) is TipoNodo.EXPRESIÓN_MATEMÁTICA:
-            resultado = self.visitar_expresión_matemática(nodo)
-
-        elif type(nodo) is TipoNodo.EXPRESIÓN:
-            resultado = self.visitar_expresión(nodo)
-
-        elif type(nodo) is TipoNodo.FUNCIÓN:
-            resultado = self.visitar_función(nodo)
-
-        elif type(nodo) is TipoNodo.INVOCACIÓN:
-            resultado = self.visitar_invocación(nodo)
-
-        elif type(nodo) is TipoNodo.PARÁMETROS_INVOCACIÓN:
-            resultado = self.visitar_parámetros_invocación(nodo)
-
-        elif type(nodo) is TipoNodo.PARÁMETROS_FUNCIÓN:
-            resultado = self.visitar_parámetros_función(nodo)
-
-        elif type(nodo) is TipoNodo.INSTRUCCIÓN:
-            resultado = self.visitar_instrucción(nodo)
-
-        elif type(nodo) is TipoNodo.REPETICIÓN:
-            resultado = self.visitar_repetición(nodo)
-
-        elif type(nodo) is TipoNodo.BIFURCACIÓN:
-            resultado = self.visitar_bifurcación(nodo)
-
-        elif type(nodo) is TipoNodo.DIAYSI:
-            resultado = self.visitar_diaysi(nodo)
-
-        elif type(nodo) is TipoNodo.SINO:
-            resultado = self.visitar_sino(nodo)
-
-        elif type(nodo) is TipoNodo.OPERADOR_LÓGICO:
-            resultado = self.visitar_operador_lógico(nodo)
-
-        elif type(nodo) is TipoNodo.CONDICIÓN:
-            resultado = self.visitar_condición(nodo)
-
-        elif type(nodo) is TipoNodo.COMPARACIÓN:
-            resultado = self.visitar_comparación(nodo)
-
-        elif type(nodo) is TipoNodo.RETORNO:
-            resultado = self.visitar_retorno(nodo)
-
-        elif type(nodo) is TipoNodo.ERROR:
-            resultado = self.visitar_error(nodo)
-
-        elif type(nodo) is TipoNodo.PRINCIPAL:
-            resultado = self.visitar_principal(nodo)
-
-        elif type(nodo) is TipoNodo.BLOQUE_INSTRUCCIONES:
-            resultado = self.visitar_bloque_instrucciones(nodo)
-
-        elif type(nodo) is TipoNodo.OPERADOR:
-            resultado = self.visitar_operador(nodo)
-
-        elif type(nodo) is TipoNodo.VALOR_VERDAD:
-            resultado = self.visitar_valor_verdad(nodo)
-
-        elif type(nodo) is TipoNodo.COMPARADOR:
-            resultado = self.visitar_comparador(nodo)
-
-        elif type(nodo) is TipoNodo.TEXTO:
-            resultado = self.visitar_texto(nodo)
-
-        elif type(nodo) is TipoNodo.ENTERO:
-            resultado = self.visitar_entero(nodo)
-
-        elif type(nodo) is TipoNodo.FLOTANTE:
-            resultado = self.visitar_flotante(nodo)
-
-        elif type(nodo) is TipoNodo.IDENTIFICADOR:
-            resultado = self.visitar_identificador(nodo)
-
-        else:
-            # Puse esta opción nada más para que se vea bonito... 
-            raise Exception('En realidad nunca va a llegar acá')"""
-        return resultado
 
     def visitar_programa(self, nodo_actual : NodoPrograma):
         """
-        Programa ::= (Comentario | Asignación | Función)* Principal
+        Programa::= (Comentario | Declaracion | Expresion | Operandos | Funcion*
         """
 
         instrucciones = []
@@ -131,7 +36,7 @@ class VisitantePython:
 
     def visitar_funcion(self, nodo_actual : NodoFuncion):
         """
-        Función ::= (Comentario)? mae Identificador (ParámetrosFunción) BloqueInstrucciones
+        Funcion ::= "funcion" Identificador Parametros? "inicio_funcion" (Instruccion+)? Devuelve "final_funcion."
         """
 
         resultado = """\ndef {}({}):\n{}"""
@@ -139,8 +44,9 @@ class VisitantePython:
         identificador = nodo_actual.identificador.visitar(self)
 
         parametros = []
-        for nodo in nodo_actual.parametros:
-            parametros += [nodo.visitar(self)]
+        if nodo_actual.parametros is not None:
+            for nodo in nodo_actual.parametros:
+                parametros += [nodo.visitar(self)]
 
         instrucciones = []
         for nodo in nodo_actual.instrucciones:
@@ -154,7 +60,7 @@ class VisitantePython:
 
     def visitar_parametro(self, nodo_actual : NodoParametro):
         """
-        ParámetrosFunción ::= Identificador (/ Identificador)+
+        Parametro ::= Tipo Identificador
         """
         identificador = nodo_actual.identificador.visitar(self)
         resultado = """{} : {}"""
@@ -162,7 +68,7 @@ class VisitantePython:
 
     def visitar_devuelve(self, nodo_actual : NodoDevuelve):
         """
-        Retorno :: sarpe (Valor)?
+       Devuelve ::= "devuelve" (Valor)? "\n"
         """
 
         resultado = 'return {}'
@@ -172,7 +78,7 @@ class VisitantePython:
 
     def visitar_mientras(self, nodo_actual : NodoMientras):
         """
-        Repetición ::= upee ( Condición ) BloqueInstrucciones
+        Mientras ::= "mientras" Condición "inicia_mientras" Instruccion+ "final_mientras"
         """
 
         resultado = """while {}:\n{}"""
@@ -190,7 +96,7 @@ class VisitantePython:
 
     def visitar_desde(self, nodo_actual : NodoDesde):
         """
-        Repetición ::= upee ( Condición ) BloqueInstrucciones
+        Desde ::= "desde" Numero "hasta" Numero "inicia_desde" Instruccion+ "final_desde"
         """
 
         resultado = """for {} in range({}, {}):\n{}"""
@@ -210,7 +116,7 @@ class VisitantePython:
 
     def visitar_si(self, nodo_actual: NodoSi):
         """
-        DiaySi ::= diay siii ( Condición ) BloqueInstrucciones
+        Si ::= "si" Condicion "inicio_si" Instruccion+ "final_si" ("\n" Sino)?
         """
 
         resultado = """{}\n{}"""
@@ -224,19 +130,19 @@ class VisitantePython:
         for nodo in nodo_actual.instrucciones:
             instrucciones.append(self.retornar_tabuladores() + nodo.visitar(self))
         resultadoIF = resultadoIF.format(condicion, '\n'.join(instrucciones))
+        self.tabuladores -= 1
 
         if nodo_actual.sino is not None:
             resultadoELSE = nodo_actual.sino.visitar(self)
 
-        self.tabuladores -= 1
         return resultado.format(resultadoIF, resultadoELSE)
 
     def visitar_sino(self, nodo_actual : NodoSino):
         """
-        Sino ::= sino ni modo BloqueInstrucciones
+        Sino ::= "sino" Instruccion+ "final_sino"
         """
 
-        resultado = """else:\n{}"""
+        resultado = self.retornar_tabuladores() + """else:\n{}"""
         self.tabuladores += 1
 
         instrucciones = []
@@ -249,7 +155,7 @@ class VisitantePython:
 
     def visitar_llamada(self, nodo_actual : NodoLlamada):
         """
-        Invocación ::= Identificador ( ParámetrosInvocación )
+        Llamada ::= "llamar" Identificador ("recibe" Parametro+)?
         """
 
         resultado = """{}({})"""
@@ -264,14 +170,14 @@ class VisitantePython:
 
     def visitar_declaracion_comun(self, nodo_actual : NodoDeclaracionComun):
         """
-        Asignación ::= Identificador metale (Identificador | Literal | ExpresiónMatemática | Invocación )
+        DeclaracionComun ::= Tipo Expresion
         """
 
         return nodo_actual.expresion.visitar(self)
 
     def visitar_expresion(self, nodo_actual : NodoExpresion):
         """
-        Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
+        Expresion::= Identificador "tiene" (Operacion | Valor) "\n"
         """
         resultado = """{} = {}"""
         identificador = nodo_actual.identificador.visitar(self)
@@ -280,7 +186,7 @@ class VisitantePython:
 
     def visitar_operacion_aritmetica(self, nodo_actual : NodoOperacionAritmetica):
         """
-        Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
+        Operacion ::= Valor (OperadoresArtimeticos) Valor
         """
 
         resultado = """{}{}{}"""
@@ -295,7 +201,7 @@ class VisitantePython:
 
     def visitar_operacion_logica(self, nodo_actual : NodoOperacionLogica):
         """
-        Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
+        Operacion ::= Valor (OperadoresLogicos) Valor
         """
 
         resultado = """{}{}{}"""
@@ -310,37 +216,37 @@ class VisitantePython:
 
     def visitar_numero(self, nodo_actual : NodoNumero):
         """
-        Entero ::= (-)?\d+
+        Numero ::= (-)?\d+
         """
         return str(nodo_actual.valor)
 
     def visitar_flotante(self, nodo_actual : NodoFlotante):
         """
-        Flotante ::= (-)?\d+.(-)?\d+
+        Flotante ::= (-)?([0-9]*[,])[0-9]+
         """
         return str(nodo_actual.valor)
 
-    def visitar_texto(self, nodo_actual):
+    def visitar_texto(self, nodo_actual: NodoTexto):
         """
-        Texto ::= ~/\w(\s\w)*)?~
+        Texto ::= ^(\").+(\")$
         """
         return nodo_actual.valor
 
     def visitar_booleano(self, nodo_actual : NodoBooleano):
         """
-        ValorVerdad ::= (True | False)
+        Booleano ::= ("verdadero" | "falso")
         """
         return str(nodo_actual.valor)
 
     def visitar_identificador(self, nodo_actual : NodoIdentificador):
         """
-        Identificador ::= [a-z][a-zA-Z0-9]+
+        Identificador ::= [a-z]([a-zA-z0-9])*
         """
         return nodo_actual.identificador
 
     def visitar_condicion(self, nodo_actual : NodoCondicion):
         """
-        Condición ::= Comparación ((divorcio|casorio) Comparación)?
+        Condicion ::= Comparacion (("y" | "o")| Comparacion)?
         """
         operaciones = []
         operadores = []
@@ -352,7 +258,7 @@ class VisitantePython:
 
         resultado = operaciones[0] + " "
         if len(nodo_actual.operadores) == 0:
-            return resultado
+            return operaciones[0]
         else:
             for i in range(len(operadores)):
                 resultado += operadores[i] + " " + operaciones[i+1] + " "
@@ -362,23 +268,38 @@ class VisitantePython:
         return "\t" * self.tabuladores
 
     def visitar_escribir(self, nodo_actual : NodoEscribir):
+        """
+        Escribir ::= "escribir" (Booleano | Numero | Texto | Identificador)*
+        """
         resultado = """escribir({})"""
-        return resultado.format(nodo_actual.valor)
+        return resultado.format(nodo_actual.valor.visitar(self))
 
     def visitar_recibir_entrada(self, nodo_actual : NodoRecibirEntrada):
+        """
+        Recibir_entrada ::= "recibir_entrada" ("con_comentario" (Booleano | Numero| Texto) | "sin_comentario" ) Guardar_en
+        """
         resultado = """{} = recibirEntrada({})"""
         identificador = nodo_actual.identificadorObjetivo.visitar(self)
-        return resultado.format(identificador, nodo_actual.comentario)
+        return resultado.format(identificador, nodo_actual.comentario.visitar(self))
 
     def visitar_aleatorio(self, nodo_actual : NodoAleatorio):
+        """
+        Aleatorio::= "numerico_aletorio" ("de" Numero "a" Numero)?
+        """
         resultado = """aleatorio({}, {})"""
         return resultado.format(nodo_actual.inicioRango, nodo_actual.finalRango)
 
     def visitar_dormir(self, nodo_actual : NodoDormir):
+        """
+        Dormir ::= "dormir" Numero
+        """
         resultado = """dormir({})"""
         return resultado.format(nodo_actual.tiempo)
 
     def visitar_valor_absoluto(self, nodo_actual : NodoValorAbsoluto):
+        """
+        ValorAbsoluto ::= "valor_absoluto" Numero
+        """
         resultado = """valorAbsoluto({})"""
         return resultado.format(nodo_actual.numero)
 

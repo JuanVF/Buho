@@ -5,7 +5,7 @@ from ayuda import help, version
 from explorador.explorador import invocar_explorador
 from analizador.analizador import invocar_analizador
 from verificador.verificador import invocar_verificador
-from generador.generador import invocar_generador
+from generador.generador import invocar_generador, invocar_generador_archivo
 
 """
     Opciones de ejecución para el lenguaje buho
@@ -20,10 +20,12 @@ opciones = {
     "-a": invocar_analizador,
     "-v": invocar_verificador,
     "-g": invocar_generador,
+    "-ga": invocar_generador_archivo,
     "-explorar": invocar_explorador,
     "-analizar": invocar_analizador,
     "-verificar": invocar_verificador,
-    "-generar": invocar_generador
+    "-generar": invocar_generador,
+    "-generarArchivo": invocar_generador_archivo
 }
 
 """
@@ -62,7 +64,9 @@ def main():
     if cantidad_argumentos > 2:
         opcion = sys.argv[2]
 
-        if opcion in opciones:
+        if opcion in ["-ga", "-generarArchivo"]:
+            opciones[opcion](archivo, ruta_archivo)
+        elif opcion in opciones:
             opciones[opcion](archivo)
         else:
             log_error(f"La opción {opcion} no es válida")
@@ -71,3 +75,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #path = "C:\\Pycharm\\Proyectos\\Buho\\documentacion\\Entregable 1 - Gramatica\\Código de ejemplos\\Ejemplo3.bh"
+    #archivo = leer_archivo(path)
+    #invocar_generador(archivo)
+    #invocar_generador_archivo(archivo, path)
