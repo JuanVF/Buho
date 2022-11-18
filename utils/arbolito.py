@@ -388,15 +388,15 @@ class NodoExpresion(NodoArbol):
     identificador: NodoIdentificador
     operacion: NodoOperacion
 
-    def __init__(self, identificador=None, valor=None, atributos=None):
+    def __init__(self, identificador=None, operacion=None, atributos=None):
         super().__init__(atributos)
         self.identificador = identificador
-        self.valor = valor
+        self.operacion = operacion
 
     def __str__(self):
         resultado = super().__str__()
         resultado += self.imprimirAtt(self.identificador)
-        resultado += self.imprimirAtt(self.valor)
+        resultado += self.imprimirAtt(self.operacion)
         resultado = resultado[:-2]
 
         return resultado

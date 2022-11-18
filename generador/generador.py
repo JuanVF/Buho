@@ -1,9 +1,8 @@
 # Implementa el veficador de ciruelas
 
 from utils.arbolito import Arbol, NodoArbol
-from visitadores import VisitantePython
-from verificador.verificador import invocar_verificador
-
+from generador.visitadores import VisitantePython
+from verificador.verificador import invocar_verificador_para_generador
 
 class Generador:
     asa: Arbol
@@ -52,7 +51,7 @@ def valorAbsoluto(x):
         print(resultado)
 
 def invocar_generador(contenido_archivo):
-    asa = invocar_verificador(contenido_archivo)
+    asa = invocar_verificador_para_generador(contenido_archivo)
 
     generador = Generador(asa)
     generador.generar()

@@ -136,6 +136,7 @@ class VisitantePython:
 
         resultado = """\ndef {}({}):\n{}"""
         self.tabuladores += 1
+        identificador = nodo_actual.identificador.visitar(self)
 
         parametros = []
         for nodo in nodo_actual.parametros:
@@ -149,15 +150,15 @@ class VisitantePython:
             instrucciones += [self.retornar_tabuladores() + nodo_actual.devuelve.visitar(self)]
 
         self.tabuladores -= 1
-        return resultado.format(nodo_actual.identificador, ', '.join(parametros), '\n'.join(instrucciones))
+        return resultado.format(identificador, ', '.join(parametros), '\n'.join(instrucciones))
 
     def visitar_parametro(self, nodo_actual : NodoParametro):
         """
         ParámetrosFunción ::= Identificador (/ Identificador)+
         """
-
+        identificador = nodo_actual.identificador.visitar(self)
         resultado = """{} : {}"""
-        resultado.format(nodo_actual.identificador, self.tipoDatosCambio(nodo_actual.tipo))
+        return resultado.format(identificador, self.tipoDatosCambio(nodo_actual.tipo))
 
     def visitar_devuelve(self, nodo_actual : NodoDevuelve):
         """
@@ -253,12 +254,13 @@ class VisitantePython:
 
         resultado = """{}({})"""
 
+        identificador = nodo_actual.identificador.visitar(self)
         parametros = []
 
         for nodo in nodo_actual.params:
             parametros += [nodo.visitar(self)]
 
-        return resultado.format(nodo_actual.identificador, ', '.join(parametros))
+        return resultado.format(identificador, ', '.join(parametros))
 
     def visitar_declaracion_comun(self, nodo_actual : NodoDeclaracionComun):
         """
@@ -272,15 +274,16 @@ class VisitantePython:
         Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
         """
         resultado = """{} = {}"""
+        identificador = nodo_actual.identificador.visitar(self)
         valor = nodo_actual.operacion.visitar(self)
-        return resultado.format(nodo_actual.identificador, valor)
+        return resultado.format(identificador, valor)
 
     def visitar_operacion_aritmetica(self, nodo_actual : NodoOperacionAritmetica):
         """
         Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
         """
 
-        resultado = """{} {} {}"""
+        resultado = """{}{}{}"""
         operado = nodo_actual.operado.visitar(self)
         operador = ""
         operando = ""
@@ -295,7 +298,7 @@ class VisitantePython:
         Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
         """
 
-        resultado = """{} {} {}"""
+        resultado = """{}{}{}"""
         operado = nodo_actual.operado.visitar(self)
         operador = ""
         operando = ""
@@ -358,6 +361,27 @@ class VisitantePython:
     def retornar_tabuladores(self):
         return "\t" * self.tabuladores
 
+    def visitar_escribir(self, nodo_actual : NodoEscribir):
+        resultado = """escribir({})"""
+        return resultado.format(nodo_actual.valor)
+
+    def visitar_recibir_entrada(self, nodo_actual : NodoRecibirEntrada):
+        resultado = """{} = recibirEntrada({})"""
+        identificador = nodo_actual.identificadorObjetivo.visitar(self)
+        return resultado.format(identificador, nodo_actual.comentario)
+
+    def visitar_aleatorio(self, nodo_actual : NodoAleatorio):
+        resultado = """aleatorio({}, {})"""
+        return resultado.format(nodo_actual.inicioRango, nodo_actual.finalRango)
+
+    def visitar_dormir(self, nodo_actual : NodoDormir):
+        resultado = """dormir({})"""
+        return resultado.format(nodo_actual.tiempo)
+
+    def visitar_valor_absoluto(self, nodo_actual : NodoValorAbsoluto):
+        resultado = """valorAbsoluto({})"""
+        return resultado.format(nodo_actual.numero)
+
     def tipoDatosCambio(self, tipo : TipoDatos):
         if tipo == TipoDatos.TEXTO:
             return "str"
@@ -406,26 +430,6 @@ class VisitantePython:
         if tipo == OperandosLogicos.NO:
             return "not"
         return ""
-
-    def visitar_escribir(self, nodo_actual : NodoEscribir):
-        resultado = """escribir({})"""
-        return resultado.format(nodo_actual.valor)
-
-    def visitar_recibir_entrada(self, nodo_actual : NodoRecibirEntrada):
-        resultado = """{} = recibirEntrada({})"""
-        return resultado.format(nodo_actual.identificadorObjetivo, nodo_actual.comentario)
-
-    def visitar_aleatorio(self, nodo_actual : NodoAleatorio):
-        resultado = """aleatorio({}, {})"""
-        return resultado.format(nodo_actual.inicioRango, nodo_actual.finalRango)
-
-    def visitar_dormir(self, nodo_actual : NodoDormir):
-        resultado = """dormir({})"""
-        return resultado.format(nodo_actual.tiempo)
-
-    def visitar_valor_absoluto(self, nodo_actual : NodoValorAbsoluto):
-        resultado = """valorAbsoluto({})"""
-        return resultado.format(nodo_actual.numero)
 
     #-------------------------------------------------todo?-------------------------------------------------------------
 

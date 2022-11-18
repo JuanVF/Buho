@@ -1,17 +1,16 @@
 # Analizador para el lenguaje Buho
 
 import os, sys
-
-from utils.operandosAritmeticos import OperandosAritmeticos
-from utils.operandosLogicos import OperandosLogicos
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
     NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando
+from utils.tipoDatos import TipoDatos
+from utils.operandosAritmeticos import OperandosAritmeticos
+from utils.operandosLogicos import OperandosLogicos
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 class Analizador:
@@ -113,7 +112,7 @@ class Analizador:
         es_logico = self.componente_actual.tipo == TipoComponente.OPERADOR_LOGICO
 
         if not es_aritmetico and not es_logico:
-            return NodoOperacion(primer_valor)
+            return NodoOperacionAritmetica(primer_valor)
 
         operador = None
 
@@ -727,10 +726,18 @@ class Analizador:
         Tipo ::= ("numerico" | "flotante" | "texto" | "bool")
         """
 
+        tipo = None
         if self.componente_actual.texto not in {'numerico', 'flotante', 'texto', 'bool'}:
-            return None
+            return tipo
 
-        tipo = self.componente_actual.texto
+        if self.componente_actual.texto == 'numerico':
+            tipo = TipoDatos.NUMERO
+        elif self.componente_actual.texto == 'flotante':
+            tipo = TipoDatos.FLOTANTE
+        elif self.componente_actual.texto == 'texto':
+            tipo = TipoDatos.TEXTO
+        elif self.componente_actual.texto == 'bool':
+            tipo = TipoDatos.BOOLEANO
         self.__siguiente_componente()
 
         return tipo
@@ -785,10 +792,16 @@ def invocar_analizador(contenido_archivo):
     explorador = Explorador(contenido_archivo)
     explorador.explorar()
 
-    #explorador.imprimir_componentes()
+    analizador = Analizador(explorador.componentes)
+    analizador.analizar()
+
+    analizador.imprimir_asa()
+
+def invocar_analizador_para_verificador(contenido_archivo):
+    explorador = Explorador(contenido_archivo)
+    explorador.explorar()
 
     analizador = Analizador(explorador.componentes)
     analizador.analizar()
-    analizador.imprimir_asa()
-    
+
     return analizador.asa

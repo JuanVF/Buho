@@ -641,6 +641,13 @@ def invocar_verificador(contenido_archivo):
 
     verificador = Verificador(asa)
     verificador.verificar()
+
     verificador.imprimir_asa()
+
+def invocar_verificador_para_generador(contenido_archivo):
+    asa = invocar_analizador(contenido_archivo)
+
+    verificador = Verificador(asa)
+    verificador.verificar()
 
     return verificador.asa
