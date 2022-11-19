@@ -3,6 +3,37 @@ from utils.tipoDatos import TipoDatos
 from utils.operandosLogicos import OperandosLogicos
 from utils.operandosAritmeticos import OperandosAritmeticos
 from logger import bcolors
+from enum import Enum, auto
+
+class TipoNodo(Enum):
+    ERROR = auto()
+    PROGRAMA = auto()
+    VALOR = auto()
+    NUMERO = auto()
+    FLOTANTE = auto()
+    TEXTO = auto()
+    BOOLEANO = auto()
+    IDENTIFICADOR = auto()
+    LLAMADA = auto()
+    OPERACION = auto()
+    OPERACION_ARITMETICA = auto()
+    OPERACION_LOGICA = auto()
+    EXPRESION = auto()
+    DECLARACION_COMUN = auto()
+    ESCRIBIR = auto()
+    RECIBIR_ENTRADA = auto()
+    CONDICION = auto()
+    SINO = auto()
+    SI = auto()
+    OPERANDO = auto()
+    MIENTRAS = auto()
+    DESDE = auto()
+    ALEATORIO = auto()
+    DORMIR = auto()
+    VALOR_ABSOLUTO = auto()
+    PARAMETRO = auto()
+    DEVUELVE = auto()
+    FUNCION = auto()
 
 """
 Clase de nodo general para el árbol de sintaxis abstracta
@@ -10,6 +41,7 @@ Clase de nodo general para el árbol de sintaxis abstracta
 """
 class NodoArbol:
     atributos: dict
+    tipoNodo : TipoNodo
 
     def __init__(self, atributos=None):
         if atributos is None:
@@ -81,6 +113,7 @@ class NodoError(NodoArbol):
         self.tipoError = "Error sintáctico detectado en: "
         self.error = error
         self.sugerencia = sugerencia
+        self.tipoNodo = TipoNodo.ERROR
         print(self.printErr())
 
     def printErr(self):
@@ -113,6 +146,7 @@ class NodoPrograma(NodoArbol):
         if nodos is None:
             nodos = []
         self.nodos = nodos
+        self.tipoNodo = TipoNodo.PROGRAMA
 
     def __str__(self):
         resultado = super().__str__()
@@ -143,6 +177,7 @@ class NodoValor(NodoArbol):
         super().__init__(atributos)
         self.valor = valor
         self.tipo = tipo
+        self.tipoNodo = TipoNodo.VALOR
 
     def __str__(self):
         resultado = super().__str__()
@@ -162,6 +197,7 @@ class NodoNumero(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.NUMERO, valor, atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.NUMERO
 
     def visitar(self, visitador):
         return visitador.visitar_numero(self)
@@ -176,6 +212,7 @@ class NodoFlotante(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.FLOTANTE, valor, atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.FLOTANTE
 
     def visitar(self, visitador):
         return visitador.visitar_flotante(self)
@@ -190,6 +227,7 @@ class NodoTexto(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.TEXTO, valor, atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.TEXTO
 
     def visitar(self, visitador):
         return visitador.visitar_texto(self)
@@ -204,6 +242,7 @@ class NodoBooleano(NodoValor):
     def __init__(self, valor=None, atributos=None):
         super().__init__(TipoDatos.BOOLEANO, valor, atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.BOOLEANO
 
     def visitar(self, visitador):
         return visitador.visitar_booleano(self)
@@ -218,6 +257,7 @@ class NodoIdentificador(NodoArbol):
     def __init__(self, identificador=None, atributos=None):
         super().__init__(atributos)
         self.identificador = identificador
+        self.tipoNodo = TipoNodo.IDENTIFICADOR
 
     def __str__(self):
         resultado = super().__str__()
@@ -243,6 +283,7 @@ class NodoLlamada(NodoArbol):
         super().__init__(atributos)
         self.identificador = identificador
         self.params = params
+        self.tipoNodo = TipoNodo.LLAMADA
 
     def __str__(self):
         resultado = super().__str__()
@@ -275,6 +316,7 @@ class NodoOperacion(NodoArbol):
         self.primer_valor = primer_valor
         self.operacion = operacion
         self.segundo_valor = segundo_valor
+        self.tipoNodo = TipoNodo.OPERACION
 
     def __str__(self):
         resultado = super().__str__()
@@ -313,6 +355,7 @@ class NodoOperacionAritmetica(NodoArbol):
         self.operado = operado
         self.operador = operador
         self.operando = operando
+        self.tipoNodo = TipoNodo.OPERACION_ARITMETICA
 
     def __str__(self):
         resultado = super().__str__()
@@ -354,6 +397,7 @@ class NodoOperacionLogica(NodoArbol):
         self.operado = operado
         self.operador = operador
         self.operando = operando
+        self.tipoNodo = TipoNodo.OPERACION_LOGICA
 
     def __str__(self):
         resultado = super().__str__()
@@ -392,6 +436,7 @@ class NodoExpresion(NodoArbol):
         super().__init__(atributos)
         self.identificador = identificador
         self.operacion = operacion
+        self.tipoNodo = TipoNodo.EXPRESION
 
     def __str__(self):
         resultado = super().__str__()
@@ -423,6 +468,7 @@ class NodoDeclaracionComun(NodoArbol):
         super().__init__(atributos)
         self.tipo = tipo
         self.expresion = expresion
+        self.tipoNodo = TipoNodo.DECLARACION_COMUN
 
     def __str__(self):
         resultado = super().__str__()
@@ -445,6 +491,7 @@ class NodoEscribir(NodoArbol):
     def __init__(self, valor=None, atributos=None):
         super().__init__(atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.ESCRIBIR
 
     def __str__(self):
         resultado = super().__str__()
@@ -470,6 +517,7 @@ class NodoRecibirEntrada(NodoArbol):
         super().__init__(atributos)
         self.comentario = comentario
         self.identificadorObjetivo = identificadorObjetivo
+        self.tipoNodo = TipoNodo.RECIBIR_ENTRADA
 
     def __str__(self):
         resultado = super().__str__()
@@ -500,6 +548,7 @@ class NodoCondicion(NodoArbol):
         super().__init__(atributos)
         self.condicion = condicion
         self.operadores = operadores
+        self.tipoNodo = TipoNodo.CONDICION
 
     def __str__(self):
         resultado = super().__str__()
@@ -531,6 +580,7 @@ class NodoSino(NodoArbol):
     def __init__(self, instrucciones=None, atributos=None):
         super().__init__(atributos)
         self.instrucciones = instrucciones
+        self.tipoNodo = TipoNodo.SINO
 
     def __str__(self):
         resultado = super().__str__()
@@ -564,6 +614,7 @@ class NodoSi(NodoArbol):
         self.condicion = condicion
         self.instrucciones = instrucciones
         self.sino = sino
+        self.tipoNodo = TipoNodo.SI
 
     def __str__(self):
         resultado = super().__str__()
@@ -599,6 +650,7 @@ class NodoOperando(NodoArbol):
     def __init__(self, operando=None, atributos=None):
         super().__init__(atributos)
         self.operando = operando
+        self.tipoNodo = TipoNodo.OPERANDO
 
     def __str__(self):
         resultado = super().__str__()
@@ -630,6 +682,7 @@ class NodoMientras(NodoArbol):
         super().__init__(atributos)
         self.condicion = condicion
         self.instrucciones = instrucciones
+        self.tipoNodo = TipoNodo.MIENTRAS
 
     def __str__(self):
         resultado = super().__str__()
@@ -666,6 +719,7 @@ class NodoDesde(NodoArbol):
         self.inicioRango = inicioRango
         self.finalRango = finalRango
         self.instrucciones = instrucciones
+        self.tipoNodo = TipoNodo.DESDE
 
     def __str__(self):
         resultado = super().__str__()
@@ -698,6 +752,7 @@ class NodoAleatorio(NodoArbol):
         super().__init__(atributos)
         self.inicioRango = inicioRango
         self.finalRango = finalRango
+        self.tipoNodo = TipoNodo.ALEATORIO
 
     def __str__(self):
         resultado = super().__str__()
@@ -720,6 +775,7 @@ class NodoDormir(NodoArbol):
     def __init__(self, tiempo=None, atributos=None):
         super().__init__(atributos)
         self.tiempo = tiempo
+        self.tipoNodo = TipoNodo.DORMIR
 
     def __str__(self):
         resultado = super().__str__()
@@ -741,6 +797,7 @@ class NodoValorAbsoluto(NodoArbol):
     def __init__(self, numero=None, atributos=None):
         super().__init__(atributos)
         self.numero = numero
+        self.tipoNodo = TipoNodo.VALOR_ABSOLUTO
 
     def __str__(self):
         resultado = super().__str__()
@@ -765,6 +822,7 @@ class NodoParametro(NodoArbol):
         super().__init__(atributos)
         self.tipo = tipo
         self.identificador = identificador
+        self.tipoNodo = TipoNodo.PARAMETRO
 
     def __str__(self):
         resultado = super().__str__()
@@ -787,6 +845,7 @@ class NodoDevuelve(NodoArbol):
     def __init__(self, valor=None, atributos=None):
         super().__init__(atributos)
         self.valor = valor
+        self.tipoNodo = TipoNodo.DEVUELVE
 
     def __str__(self):
         resultado = super().__str__()
@@ -823,6 +882,7 @@ class NodoFuncion(NodoArbol):
         self.parametros = parametros
         self.instrucciones = instrucciones
         self.devuelve = devuelve
+        self.tipoNodo = TipoNodo.FUNCION
 
     def __str__(self):
         resultado = super().__str__()

@@ -3,7 +3,8 @@ from analizador.analizador import invocar_analizador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
-    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando
+    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando, \
+    TipoNodo, NodoValor, NodoArbol
 from utils.tipoDatos import TipoDatos
 from utils.operandosLogicos import OperandosLogicos
 from utils.operandosAritmeticos import OperandosAritmeticos
@@ -88,92 +89,92 @@ class Visitante:
     def __init__(self, nueva_tabla_símbolos):
         self.tabla_símbolos = nueva_tabla_símbolos
 
-    def visitar(self, nodo: TipoNodo):
+    def visitar(self, nodo: NodoArbol):
         """
         Este método es necesario por que uso un solo tipo de nodo para
         todas las partes del árbol por facilidad... pero cómo lo hice
         tuanis allá... pues bueno... acá hay que pagar el costo.
         """
 
-        if nodo.tipo is TipoNodo.PROGRAMA:
+        if nodo.tipoNodo is TipoNodo.PROGRAMA:
             self.__visitar_programa(nodo)
 
-        elif nodo.tipo is TipoNodo.ASIGNACIÓN:
+        elif nodo.tipoNodo is TipoNodo.ASIGNACIÓN:
             self.__visitar_asignación(nodo)
 
-        elif nodo.tipo is TipoNodo.EXPRESIÓN_MATEMÁTICA:
+        elif nodo.tipoNodo is TipoNodo.EXPRESIÓN_MATEMÁTICA:
             self.__visitar_expresión_matemática(nodo)
 
-        elif nodo.tipo is TipoNodo.EXPRESIÓN:
+        elif nodo.tipoNodo is TipoNodo.EXPRESION:
             self.__visitar_expresión(nodo)
 
-        elif nodo.tipo is TipoNodo.FUNCIÓN:
+        elif nodo.tipoNodo is TipoNodo.FUNCIÓN:
             self.__visitar_función(nodo)
 
-        elif nodo.tipo is TipoNodo.INVOCACIÓN:
+        elif nodo.tipoNodo is TipoNodo.INVOCACIÓN:
             self.__visitar_invocación(nodo)
 
-        elif nodo.tipo is TipoNodo.PARÁMETROS_INVOCACIÓN:
+        elif nodo.tipoNodo is TipoNodo.PARÁMETROS_INVOCACIÓN:
             self.__visitar_parámetros_invocación(nodo)
 
-        elif nodo.tipo is TipoNodo.PARÁMETROS_FUNCIÓN:
+        elif nodo.tipoNodo is TipoNodo.PARÁMETROS_FUNCIÓN:
             self.__visitar_parámetros_función(nodo)
 
-        elif nodo.tipo is TipoNodo.INSTRUCCIÓN:
+        elif nodo.tipoNodo is TipoNodo.INSTRUCCIÓN:
             self.__visitar_instrucción(nodo)
 
-        elif nodo.tipo is TipoNodo.REPETICIÓN:
+        elif nodo.tipoNodo is TipoNodo.REPETICIÓN:
             self.__visitar_repetición(nodo)
 
-        elif nodo.tipo is TipoNodo.BIFURCACIÓN:
+        elif nodo.tipoNodo is TipoNodo.BIFURCACIÓN:
             self.__visitar_bifurcación(nodo)
 
-        elif nodo.tipo is TipoNodo.DIAYSI:
+        elif nodo.tipoNodo is TipoNodo.DIAYSI:
             self.__visitar_diaysi(nodo)
 
-        elif nodo.tipo is TipoNodo.SINO:
+        elif nodo.tipoNodo is TipoNodo.SINO:
             self.__visitar_sino(nodo)
 
-        elif nodo.tipo is TipoNodo.OPERADOR_LÓGICO:
+        elif nodo.tipoNodo is TipoNodo.OPERADOR_LÓGICO:
             self.__visitar_operador_lógico(nodo)
 
-        elif nodo.tipo is TipoNodo.CONDICIÓN:
+        elif nodo.tipoNodo is TipoNodo.CONDICIÓN:
             self.__visitar_condición(nodo)
 
-        elif nodo.tipo is TipoNodo.COMPARACIÓN:
+        elif nodo.tipoNodo is TipoNodo.COMPARACIÓN:
             self.__visitar_comparación(nodo)
 
-        elif nodo.tipo is TipoNodo.RETORNO:
+        elif nodo.tipoNodo is TipoNodo.RETORNO:
             self.__visitar_retorno(nodo)
 
-        elif nodo.tipo is TipoNodo.ERROR:
+        elif nodo.tipoNodo is TipoNodo.ERROR:
             self.__visitar_error(nodo)
 
-        elif nodo.tipo is TipoNodo.PRINCIPAL:
+        elif nodo.tipoNodo is TipoNodo.PRINCIPAL:
             self.__visitar_principal(nodo)
 
-        elif nodo.tipo is TipoNodo.BLOQUE_INSTRUCCIONES:
+        elif nodo.tipoNodo is TipoNodo.BLOQUE_INSTRUCCIONES:
             self.__visitar_bloque_instrucciones(nodo)
 
-        elif nodo.tipo is TipoNodo.OPERADOR:
+        elif nodo.tipoNodo is TipoNodo.OPERADOR:
             self.__visitar_operador(nodo)
 
-        elif nodo.tipo is TipoNodo.VALOR_VERDAD:
+        elif nodo.tipoNodo is TipoNodo.VALOR_VERDAD:
             self.__visitar_valor_verdad(nodo)
 
-        elif nodo.tipo is TipoNodo.COMPARADOR:
+        elif nodo.tipoNodo is TipoNodo.COMPARADOR:
             self.__visitar_comparador(nodo)
 
-        elif nodo.tipo is TipoNodo.TEXTO:
+        elif nodo.tipoNodo is TipoNodo.TEXTO:
             self.__visitar_texto(nodo)
 
-        elif nodo.tipo is TipoNodo.ENTERO:
+        elif nodo.tipoNodo is TipoNodo.ENTERO:
             self.__visitar_entero(nodo)
 
-        elif nodo.tipo is TipoNodo.FLOTANTE:
+        elif nodo.tipoNodo is TipoNodo.FLOTANTE:
             self.__visitar_flotante(nodo)
 
-        elif nodo.tipo is TipoNodo.IDENTIFICADOR:
+        elif nodo.tipoNodo is TipoNodo.IDENTIFICADOR:
             self.__visitar_identificador(nodo)
 
         else:
@@ -224,15 +225,78 @@ class Visitante:
         # Anoto el tipo de datos 'NÚMERO' (TIPO)
         nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
 
-    def __visitar_expresión(self, nodo_actual):
+    def __visitar_expresión(self, nodo_actual : NodoExpresion):
         """
-        Expresión ::= ExpresiónMatemática Operador ExpresiónMatemática
+        Expresion ::= Identificador "tiene" Operacion
         """
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
 
-        # Anoto el tipo de datos 'NÚMERO' (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
+        # Verificamos que el identificador exista
+        self.__visitar_identificador(nodo_actual.identificador)
+
+        # Verificamos que la operacion entre datos sea correcta
+        self.__visitar_operacion(nodo_actual.operacion)
+
+        # Verificamos que el tipo de dato de la operacion
+        # sea el mismo que el tipo de dato del identificador
+        nombre_identificador = nodo_actual.identificador.identificador
+
+        nodo_iden : NodoDeclaracionComun = self.tabla_símbolos.verificar_existencia(nombre_identificador)
+        nodo_ope : NodoOperacion = nodo_actual.operacion
+
+        if nodo_iden.tipo != nodo_ope.primer_valor.tipo:
+            raise Exception("El tipo de dato de la operacion no es el mismo que el tipo de dato del identificador")
+
+
+    def __visitar_operacion(self, nodo_actual : NodoOperacion):
+        """
+        Operacion ::= Valor ( (OperadoresAritmeticos | OperadoresLogicos) Valor ) ?
+        """
+        primer_valor = nodo_actual.primer_valor
+        segundo_valor = nodo_actual.segundo_valor
+        operacion = nodo_actual.operacion
+
+        self.__visitar_valor(nodo_actual.primer_valor)
+
+        if nodo_actual.segundo_valor is not None:
+            self.__visitar_valor(nodo_actual.segundo_valor)
+
+            if primer_valor.tipo != segundo_valor.tipo:
+                raise Exception("El tipo de dato de los dos valores no es el mismo")
+
+            es_numerico : bool = primer_valor.tipo == TipoDatos.NUMERO or primer_valor.tipo == TipoDatos.FLOTANTE
+            es_booleano : bool = primer_valor.tipo == TipoDatos.BOOLEANO
+            es_texto : bool = primer_valor.tipo == TipoDatos.TEXTO
+
+            if es_booleano and operacion.tipoNodo == TipoNodo.OPERACION_ARITMETICA:
+                raise Exception("No se puede realizar una operacion aritmetica con valores booleanos")
+
+            if es_numerico and operacion.tipoNodo == TipoNodo.OPERACION_LOGICA:
+                raise Exception("No se puede realizar una operacion logica con valores numericos")
+
+            if es_texto and operacion.tipoNodo == TipoNodo.OPERACION_LOGICA:
+                raise Exception("No se puede realizar una operacion logica con valores de texto")
+
+            if es_texto and operacion.tipoNodo == TipoNodo.OPERACION_ARITMETICA:
+                raise Exception("No se puede realizar una operacion aritmetica con valores de texto")     
+
+    def __visitar_valor(self, nodo_actual : NodoValor):
+        """
+        Valor ::= (Identificador | Numero | Flotante | Texto | Booleano | Aleatorio)
+        """
+        
+        # Verificamos en caso de que sea un identificador
+        tipos = {
+            TipoDatos.BOOLEANO : False,
+            TipoDatos.NUMERO : False,
+            TipoDatos.FLOTANTE : False,
+            TipoDatos.TEXTO : False
+        }
+
+        # Verificamos que el identificador exista
+        es_identificador = nodo_actual.tipo not in tipos
+
+        if es_identificador:
+            self.tabla_símbolos.verificar_existencia(nodo_actual.valor)
 
     def __visitar_función(self, nodo_actual):
         """
@@ -445,13 +509,6 @@ class Visitante:
 
         else:
             raise Exception('Papo, algo tronó acá', str(nodo_actual))
-
-    def __visitar_valor(self, nodo_actual):
-        """
-        Valor ::= (Identificador | Literal)
-        """
-        # En realidad núnca se va a visitar por que lo saqué del árbol
-        # duránte la etapa de análisiss
 
     def __visitar_retorno(self, nodo_actual):
         """
