@@ -1,0 +1,25 @@
+// Recibimos los datos del usuario y lo comparamos con los datos del mapa
+texto nombre tiene "Bienvenido/a a McDonald's "
+texto textoTemp tiene ""
+
+recibir_entrada con_comentario "Ingrese su nombre: " guardar_en textoTemp
+nombre tiene nombre mas textoTemp
+nombre tiene nombre mas " "
+recibir_entrada con_comentario "Ingrese su apellido: " guardar_en textoTemp
+nombre tiene nombre mas textoTemp
+nombre tiene nombre mas " "
+recibir_entrada con_comentario "Ingrese su otro apellido: " guardar_en textoTemp
+nombre tiene nombre mas textoTemp
+nombre tiene nombre mas ". ¿Qué le puedo ofrecer hoy?"
+escribir nombre
+// Pedir la orden de mcDonald's
+//. . .
+escribir "Las opciones de pago son: "
+escribir "-> Visa "
+escribir " Platinum " por 2
+escribir "-> Visa "
+escribir " Platinum " por 3
+escribir " Plus"
+escribir "-> Visa "
+escribir " Platinum " por 3
+escribir " Plus" por 10

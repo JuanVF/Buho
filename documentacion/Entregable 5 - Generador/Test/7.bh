@@ -1,0 +1,20 @@
+funcion masAlejadoDeCero recibe numerico ax numerico bx inicio_funcion
+  numerico aAbs tiene valor_absoluto ax
+  numerico bAbs tiene valor_absoluto bx
+  numerico prueba tiene valor_absoluto 9
+  si aAbs igual bAbs inicio_si
+      escribir "Igualmente alejados de cero"
+      devuelve 0
+    final_si
+  sino
+    si aAbs mayor bAbs inicio_si
+      escribir "El primer numero está más alejado"
+      devuelve ax
+    final_si
+    sino
+      escribir "El segundo numero está más alejado"
+      devuelve bx
+    final_sino
+  final_sino
+  devuelve
+final_funcion

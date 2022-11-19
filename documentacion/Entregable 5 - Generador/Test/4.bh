@@ -1,0 +1,22 @@
+// Vamos a hacer la funcion de confirmar contraseña.
+funcion confirmaContrasena recibe texto contrasenaInicial inicio_funcion
+  
+  numerico intentos tiene 3
+  
+  mientras intentos mayor 0 inicia_mientras
+    recibir_entrada con_comentario "Confirme su contrasena: " guardar_en intentoContrasena
+
+    si intentoContrasena diferente contrasenaInicial inicio_si
+      intentos tiene intentos menos 1
+      escribir "Contrasena incorrecta, quedan"
+      escribir intentos mas "intentos"
+    final_si
+    sino
+      escribir "Contrasena correcta, muchas gracias"
+      devuelve true
+    final_sino
+  final_mientras
+
+  escribir "Lo sentimos, no se pudo confirmar la contrasena"
+  devuelve false
+final_funcion

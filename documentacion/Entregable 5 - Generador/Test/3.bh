@@ -1,0 +1,41 @@
+// Funciones haciendo uso de comparaciones 
+funcion mayorDeDosNumeros recibe numerico n1 numerico n2 inicio_funcion
+  si n1 mayor n2 inicio_si
+    devuelve n1
+  final_si
+  sino 
+    devuelve n2
+  final_sino
+  devuelve
+final_funcion
+
+funcion menorDeDosNumeros recibe numerico n1 numerico n2 inicio_funcion
+  si n1 menor n2 inicio_si
+    devuelve n1
+  final_si
+  sino 
+    devuelve n2
+  final_sino
+  devuelve
+final_funcion
+
+funcion sonNumerosIguales recibe numerico n1 numerico n2 inicio_funcion
+  si n1 igual n2 inicio_si
+    devuelve verdadero
+  final_si
+  sino 
+    devuelve falso
+  final_sino
+  devuelve
+final_funcion
+
+funcion sonNumerosDiferentes recibe numerico n1 numerico n2 inicio_funcion
+  si n1 diferente n2 inicio_si
+    devuelve verdadero
+  final_si
+  sino 
+    devuelve falso
+  final_sino
+  devuelve
+final_funcion
+

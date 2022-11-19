@@ -1,0 +1,28 @@
+funcion primo recibe numerico num inicio_funcion
+  numerico valorcito tiene llamar primoAux recibe num 2 finalLlamada
+
+  devuelve valorcito
+final_funcion
+
+funcion primoAux recibe numerico num numerico n inicio_funcion
+  numerico numUsuario tiene 0
+  recibir_entrada con_comentario "digite el numero" guardar_en numUsuario
+
+  numerico el_residuo tiene num residuo n
+
+  si numUsuario mayor_igual num inicio_si
+    escribir "es primo"
+    devuelve verdadero
+  final_si
+  sino si el_residuo diferente 0 inicio_si
+       n tiene n mas 1
+       numerico valorcito tiene llamar primoAux recibe num n finalLlamada
+       devuelve valorcito
+    final_si
+    sino
+       escribir "no es primo"
+       devuelve falso
+    final_sino
+  final_sino
+  devuelve
+final_funcion
