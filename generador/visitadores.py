@@ -301,7 +301,7 @@ class VisitantePython:
         ValorAbsoluto ::= "valor_absoluto" Numero
         """
         resultado = """valorAbsoluto({})"""
-        return resultado.format(nodo_actual.numero)
+        return resultado.format(nodo_actual.numero.visitar(self))
 
     def tipoDatosCambio(self, tipo : TipoDatos):
         if tipo == TipoDatos.TEXTO:

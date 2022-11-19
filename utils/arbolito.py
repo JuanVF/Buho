@@ -736,7 +736,7 @@ Clase de nodo para la función de ambiente general absoluto
  - número: número al cual se le aplicara la función de absoluto (|x| = x or |-x| = x)
 """
 class NodoValorAbsoluto(NodoArbol):
-    numero: int
+    numero: NodoArbol
 
     def __init__(self, numero=None, atributos=None):
         super().__init__(atributos)

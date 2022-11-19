@@ -203,6 +203,8 @@ class Analizador:
             return self.__analizar_aleatorio()
         if tipo == TipoComponente.LLAMADA:
             return self.__analizar_llamada()
+        if tipo == TipoComponente.VALOR_ABSOLUTO:
+            return self.__analizar_ValorAbsoluto()
 
         """
         Error Sintáctico
@@ -310,7 +312,7 @@ class Analizador:
         # Se empieza el análisis
         self.__verificar('escribir')  # Palabra reservada
 
-        valor = self.__analizar_valor()  # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica.
+        valor = self.__analizar_operacion()  # Ojo que esto deja que Flotante y Aleatorio entren, y estos valores no estan contemplados en la gramatica.
 
         return NodoEscribir(valor)
 
@@ -469,8 +471,8 @@ class Analizador:
             return self.__verificar_texto()
         else:
             nodoError = NodoError("Error con el componente " + self.componente_actual.texto + "\n",
-                                  "Encontrado en la fila " + self.componente_actual.fila,
-                                  ", columna: " + self.componente_actual.columna,
+                                  "Encontrado en la fila " + str(self.componente_actual.fila),
+                                  ", columna: " + str(self.componente_actual.columna),
                                   "El comparador no es Identificador | Booleano | Numero | Flotante | Texto")
             self.__siguiente_componente()
             return nodoError
@@ -533,7 +535,12 @@ class Analizador:
         ValorAbsoluto ::= "valor_absoluto" Numero
         """
         self.__verificar('valor_absoluto')
-        numero = self.__verificar_numero()
+        if self.componente_actual.tipo == TipoComponente.NUMERO:
+            numero = self.__verificar_numero()
+        elif self.componente_actual.tipo == TipoComponente.FLOTANTE:
+            numero = self.__verificar_flotante()
+        else:
+            numero = self.__verificar_identificador()
 
         return NodoValorAbsoluto(numero)
 
@@ -592,7 +599,7 @@ class Analizador:
             nodo = NodoFuncion(identificador, patrametros, nodos_instruccion, devuelve)
         else:
             devuelve = self.__analizar_devuelve()
-
+            self.__verificar('final_funcion')
             nodo = NodoFuncion(identificador, patrametros, nodos_instruccion, devuelve)
 
         return nodo

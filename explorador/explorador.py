@@ -143,7 +143,7 @@ class Explorador:
     regex_componentes = [(TipoComponente.COMENTARIO, r'^//.*'),
                          (TipoComponente.PALABRA_CLAVE, r'^(funcion|inicio_funcion|final_funcion|recibe|devuelve)$'),
                          (TipoComponente.CONDICIONAL, r'^(si|inicio_si|final_si|sino|final_sino)$'),
-                         (TipoComponente.REPETICION, r'^(mientras|inicia_mientras|final_mientas|desde|hasta|inicia_desde|final_desde)$'),
+                         (TipoComponente.REPETICION, r'^(mientras|inicia_mientras|final_mientras|desde|hasta|inicia_desde|final_desde)$'),
                          (TipoComponente.ESCRITURA, r'^(escribir)$'),
                          (TipoComponente.RECIBIMIENTO, r'^(recibir_entrada|guardar_en|con_comentario|sin_comentario|guardar_en)$'),
                          (TipoComponente.ESPERA, r'^(dormir)$'),
