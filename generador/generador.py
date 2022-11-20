@@ -66,8 +66,8 @@ def invocar_generador(contenido_archivo):
     print(resultado)
 
 def invocar_generador_archivo(contenido_archivo, originalPath):
-    asa = invocar_verificador_para_generador(contenido_archivo)
-    #asa = invocar_analizador_para_verificador(contenido_archivo)
+    #asa = invocar_verificador_para_generador(contenido_archivo)
+    asa = invocar_analizador_para_verificador(contenido_archivo)
 
     generador = Generador(asa)
     resultado = generador.generar()
