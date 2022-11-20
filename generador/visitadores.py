@@ -17,6 +17,7 @@ nodos eliminados:
     visitar_expresión_matemática
     visitar_literal
     visitar_numero
+    visitar_error
 """
 class VisitantePython:
     tabuladores = 0
@@ -27,7 +28,6 @@ class VisitantePython:
         """
 
         instrucciones = []
-        # Se ignoran los comentarios
 
         for nodo in nodo_actual.nodos:
             instrucciones.append(nodo.visitar(self))
@@ -351,18 +351,3 @@ class VisitantePython:
         if tipo == OperandosLogicos.NO:
             return "not"
         return ""
-
-    #-------------------------------------------------todo?-------------------------------------------------------------
-
-    def visitar_error(self, nodo_actual):
-        """
-        Error ::= safis Valor
-        """
-        resultado = 'print("\033[91m", {}, "\033[0m", file=sys.stderr)'
-        valor = ''
-
-        # Verifico si 'Valor' es un identificador que exista (IDENTIFICACIÓN)
-        for nodo in nodo_actual.nodos:
-            valor = nodo.visitar(self)
-
-        return resultado.format(valor)
