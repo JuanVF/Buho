@@ -50,7 +50,8 @@ def valorAbsoluto(x):
         resultado = self.asa.raiz.visitar(self.visitador)
         return resultado
 
-    def generar_archivo(self, resultado, originalPath):
+    def generar_archivo(self, originalPath):
+        resultado = self.generar()
         path = originalPath.replace('.bh', '.py')
         f = open(path, "a")
         f.write(self.ambiente_estandar + '\n' + resultado)
@@ -70,5 +71,4 @@ def invocar_generador_archivo(contenido_archivo, originalPath):
     #asa = invocar_analizador_para_verificador(contenido_archivo)
 
     generador = Generador(asa)
-    resultado = generador.generar()
-    generador.generar_archivo(resultado, originalPath)
+    generador.generar_archivo(originalPath)
