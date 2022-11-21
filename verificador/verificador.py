@@ -8,7 +8,13 @@ from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDo
 from utils.tipoDatos import TipoDatos
 from utils.operandosLogicos import OperandosLogicos
 from utils.operandosAritmeticos import OperandosAritmeticos
+from utils.buhoError import BuhoError
 
+import os, sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from logger import bcolors
 
 class TablaSímbolos:
     """
@@ -82,7 +88,8 @@ class TablaSímbolos:
                     registro['profundidad'] <= self.profundidad:
                 return registro
 
-        raise Exception('Esa vara no existe', nombre)
+        msg = ManejadorErrores("El identificador '" + nombre + "' no existe")
+        print(msg)
 
     def existe_registro(self, nombre):
         """
@@ -157,7 +164,9 @@ class Visitante:
 
         # Verificar que el número de parámetros sea el correcto
         if len(nodo.params) != len(ref.parametros):
-            raise Exception('Número de parámetros incorrecto')
+            msg = ManejadorErrores("El número de parámetros no coincide con la función '" + nodo.identificador + "'")
+
+            print(msg)
 
     def visitar_desde(self, nodo : NodoDesde):
         """
@@ -179,7 +188,7 @@ class Visitante:
         Guardar_en ::= "guardar_en" Identificador
         """
 
-        comentario = nodo.comentario
+        comentario : NodoValor = nodo.comentario
         iden = nodo.identificadorObjetivo
 
         if comentario is not None and iden is not None:
@@ -189,7 +198,9 @@ class Visitante:
             dec : NodoDeclaracionComun = self.tabla_símbolos.verificar_existencia(iden.identificador)
 
             if dec.tipo != comentario.tipo:
-                raise Exception('El tipo de dato no coincide con el tipo de dato del identificador')
+                msg = ManejadorErrores("El tipo del comentario no coincide con el tipo de la variable")
+
+                print(msg)
 
     def visitar_si(self, nodo: NodoSi):
         """
@@ -233,7 +244,9 @@ class Visitante:
         self.visitar_expresion(expresion)
 
         if self.tabla_símbolos.existe_registro(expresion.identificador):
-            raise Exception('[Buho]: La variable ya existe: ', expresion.identificador)
+            msg = ManejadorErrores("La variable " + expresion.identificador.identificador + " ya existe")
+
+            print(msg)
 
     def visitar_expresion(self, nodo_actual : NodoExpresion):
         """
@@ -276,7 +289,9 @@ class Visitante:
             return
 
         if nodo_iden.tipo != tipo_primer:
-            raise Exception("El tipo de dato de la operacion no es el mismo que el tipo de dato del identificador")
+            msg = ManejadorErrores("La variable " + nombre_identificador + " no es del tipo " + str(tipo_primer))
+
+            print(msg)
 
     def visitar_operacion(self, nodo_actual : NodoOperacionAritmetica | NodoOperacionLogica):
         """
@@ -301,7 +316,10 @@ class Visitante:
                 tipo_segundo = self.tabla_símbolos.obtener_tipo(segundo_valor.valor.identificador)
 
             if tipo_primer != tipo_segundo:
-                raise Exception("El tipo de dato de los dos valores no es el mismo")
+                msg = ManejadorErrores("Los tipos de datos no coinciden")
+
+                print(msg)
+                return
 
             es_numerico : bool = primer_valor.tipo == TipoDatos.NUMERO or primer_valor.tipo == TipoDatos.FLOTANTE
             es_booleano : bool = primer_valor.tipo == TipoDatos.BOOLEANO
@@ -312,16 +330,24 @@ class Visitante:
             es_texto : bool = primer_valor.tipo == TipoDatos.TEXTO
 
             if es_booleano and operacion.tipoNodo == TipoNodo.OPERACION_ARITMETICA:
-                raise Exception("No se puede realizar una operacion aritmetica con valores booleanos")
+                msg = ManejadorErrores("No se puede realizar una operación aritmética con un valor booleano")
+
+                print(msg)
 
             if es_numerico and operacion.tipoNodo == TipoNodo.OPERACION_LOGICA:
-                raise Exception("No se puede realizar una operacion logica con valores numericos")
+                msg = ManejadorErrores("No se puede realizar una operación lógica con un valor numérico")
+
+                print(msg)
 
             if es_texto and operacion.tipoNodo == TipoNodo.OPERACION_LOGICA:
-                raise Exception("No se puede realizar una operacion logica con valores de texto")
+                msg = ManejadorErrores("No se puede realizar una operación lógica con un valor de texto")
+
+                print(msg)
 
             if es_texto and operacion.tipoNodo == TipoNodo.OPERACION_ARITMETICA:
-                raise Exception("No se puede realizar una operacion aritmetica con valores de texto")     
+                msg = ManejadorErrores("No se puede realizar una operación aritmética con un valor de texto")
+
+                print(msg)    
 
     def visitar_valor(self, nodo_actual : NodoArbol):
         """
@@ -410,7 +436,6 @@ class Verificador:
 
 def invocar_verificador(contenido_archivo):
     asa = invocar_analizador_para_verificador(contenido_archivo)
-
     verificador = Verificador(asa)
     verificador.verificar()
 
@@ -423,3 +448,16 @@ def invocar_verificador_para_generador(contenido_archivo):
     verificador.verificar()
 
     return verificador.asa
+
+class ManejadorErrores:
+    mensaje : str
+
+    def __init__(self, mensaje : str):
+        self.mensaje = mensaje
+
+    def __str__(self) -> str:
+        return f"""
+                ******************************************** {bcolors.FAIL}Error encontrado{bcolors.ENDC} ****************************************************** 
+                {bcolors.WARNING}\tUbicado en : """ + self.mensaje + """\n\t\t...""" + " posee un error" + "..." + f"""{bcolors.ENDC}        
+                ********************************************************************************************************************
+                """
