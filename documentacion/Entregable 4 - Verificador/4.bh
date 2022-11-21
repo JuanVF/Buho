@@ -1,0 +1,8 @@
+numerico un_entero tiene 789
+numerico otro_entero tiene 2
+
+numerico result tiene un_entero mas otro_entero
+
+texto un_texto tiene "El resultado es: "
+
+texto no_se_puede_concatenar tiene un_texto mas result
