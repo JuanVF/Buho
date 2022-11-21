@@ -1,5 +1,5 @@
 # Implementa el veficador de ciruelas
-from analizador.analizador import invocar_analizador
+from analizador.analizador import invocar_analizador_para_verificador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
@@ -17,7 +17,7 @@ class TablaSímbolos:
 
     La estructura de símbolos es una lista de diccionarios
     """
-
+    símbolos : list = []
     profundidad: int = 0
 
     def abrir_bloque(self):
@@ -54,11 +54,22 @@ class TablaSímbolos:
 
         diccionario = {}
 
-        diccionario['nombre'] = nodo.contenido
+        diccionario['nombre'] = nombre_registro
         diccionario['profundidad'] = self.profundidad
         diccionario['referencia'] = nodo
 
         self.símbolos.append(diccionario)
+
+    def obtener_tipo(self, nombre):
+        """
+        Obtiene el tipo de un identificador
+        """
+        registro = self.verificar_existencia(nombre)
+
+        if registro['referencia'].tipoNodo != TipoNodo.FUNCION:
+            return registro['referencia'].tipo
+        else:
+            return "UNKNOWN"
 
     def verificar_existencia(self, nombre):
         """
@@ -73,8 +84,20 @@ class TablaSímbolos:
 
         raise Exception('Esa vara no existe', nombre)
 
-    def __str__(self):
+    def existe_registro(self, nombre):
+        """
+        Verifica si un identificador existe cómo variable/función global o local
+        """
+        for registro in self.símbolos:
 
+            # si es local
+            if registro['nombre'] == nombre and \
+                    registro['profundidad'] <= self.profundidad:
+                return True
+
+        return False
+
+    def __str__(self):
         resultado = 'TABLA DE SÍMBOLOS\n\n'
         resultado += 'Profundidad: ' + str(self.profundidad) + '\n\n'
         for registro in self.símbolos:
@@ -91,177 +114,198 @@ class Visitante:
 
     def visitar(self, nodo: NodoArbol):
         """
-        Este método es necesario por que uso un solo tipo de nodo para
-        todas las partes del árbol por facilidad... pero cómo lo hice
-        tuanis allá... pues bueno... acá hay que pagar el costo.
+        Decide qué método usar para visitar un nodo
         """
-
         if nodo.tipoNodo is TipoNodo.PROGRAMA:
-            self.__visitar_programa(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.ASIGNACIÓN:
-            self.__visitar_asignación(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.EXPRESIÓN_MATEMÁTICA:
-            self.__visitar_expresión_matemática(nodo)
-
+            self.visitar_programa(nodo)
+        elif nodo.tipoNodo is TipoNodo.DECLARACION_COMUN:
+            self.visitar_declaracion_comun(nodo)
         elif nodo.tipoNodo is TipoNodo.EXPRESION:
-            self.__visitar_expresión(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.FUNCIÓN:
-            self.__visitar_función(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.INVOCACIÓN:
-            self.__visitar_invocación(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.PARÁMETROS_INVOCACIÓN:
-            self.__visitar_parámetros_invocación(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.PARÁMETROS_FUNCIÓN:
-            self.__visitar_parámetros_función(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.INSTRUCCIÓN:
-            self.__visitar_instrucción(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.REPETICIÓN:
-            self.__visitar_repetición(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.BIFURCACIÓN:
-            self.__visitar_bifurcación(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.DIAYSI:
-            self.__visitar_diaysi(nodo)
-
+            self.visitar_expresion(nodo)
+        elif nodo.tipoNodo is TipoNodo.OPERACION_ARITMETICA or \
+                nodo.tipoNodo is TipoNodo.OPERACION_LOGICA:
+            self.visitar_operacion(nodo)
+        elif nodo.tipoNodo is TipoNodo.VALOR:
+            self.visitar_valor(nodo)
+        elif nodo.tipoNodo is TipoNodo.OPERANDO:
+            self.visitar_operando(nodo)
+        elif nodo.tipoNodo is TipoNodo.RECIBIR_ENTRADA:
+            self.visitar_recibir_entrada(nodo)
+        elif nodo.tipoNodo is TipoNodo.SI:
+            self.visitar_si(nodo)
         elif nodo.tipoNodo is TipoNodo.SINO:
-            self.__visitar_sino(nodo)
+            self.visitar_sino(nodo)
+        elif nodo.tipoNodo is TipoNodo.MIENTRAS:
+            self.visitar_mientras(nodo)
+        elif nodo.tipoNodo is TipoNodo.DESDE:
+            self.visitar_desde(nodo)
+        elif nodo.tipoNodo is TipoNodo.FUNCION:
+            self.visitar_funcion(nodo)
+        elif nodo.tipoNodo is TipoNodo.LLAMADA:
+            self.visitar_llamada(nodo)
+        elif nodo.tipoNodo is TipoNodo.PARAMETRO:
+            self.visitar_parametro(nodo)
 
-        elif nodo.tipoNodo is TipoNodo.OPERADOR_LÓGICO:
-            self.__visitar_operador_lógico(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.CONDICIÓN:
-            self.__visitar_condición(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.COMPARACIÓN:
-            self.__visitar_comparación(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.RETORNO:
-            self.__visitar_retorno(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.ERROR:
-            self.__visitar_error(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.PRINCIPAL:
-            self.__visitar_principal(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.BLOQUE_INSTRUCCIONES:
-            self.__visitar_bloque_instrucciones(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.OPERADOR:
-            self.__visitar_operador(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.VALOR_VERDAD:
-            self.__visitar_valor_verdad(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.COMPARADOR:
-            self.__visitar_comparador(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.TEXTO:
-            self.__visitar_texto(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.ENTERO:
-            self.__visitar_entero(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.FLOTANTE:
-            self.__visitar_flotante(nodo)
-
-        elif nodo.tipoNodo is TipoNodo.IDENTIFICADOR:
-            self.__visitar_identificador(nodo)
-
-        else:
-            # Puse esta opción nada más para que se vea bonito...
-            raise Exception('En realidad nunca va a llegar acá')
-
-    def __visitar_programa(self, nodo_actual):
+    def visitar_llamada(self, nodo : NodoLlamada):
         """
-        Programa ::= (Comentario | Asignación | Función)* Principal
+        Llamada ::= "llamar" Identificador ("recibe" Parametro+)?
         """
-        for nodo in nodo_actual.nodos:
-            # acá 'self' quiere decir que al método 'visitar' le paso el
-            # objetto visitante que estoy usando (o sea, este mismo...
-            # self)
-            nodo.visitar(self)
+        # Verificar que la función exista
+        registro = self.tabla_símbolos.verificar_existencia(nodo.nombre)
 
-    def __visitar_asignación(self, nodo_actual):
+        ref : NodoFuncion = registro['referencia']
+
+        # Verificar que el número de parámetros sea el correcto
+        if len(nodo.params) != len(ref.parametros):
+            raise Exception('Número de parámetros incorrecto')
+
+    def visitar_desde(self, nodo : NodoDesde):
         """
-        Asignación ::= Identificador metale (Identificador | Literal | ExpresiónMatemática | Invocación )
+        Desde ::= "desde" Numero "hasta" Numero "inicia_desde" Instruccion+ "final_desde"
         """
-        # Metó la información en la tabla de símbolos (IDENTIFICACIÓN)
-        self.tabla_símbolos.nuevo_registro(nodo_actual.nodos[0])
+        for n in nodo.instrucciones:
+            self.visitar(n)
 
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # Si es una función verifico el tipo que retorna para incluirlo en
-        # la asignación y si es un literal puedo anotar el tipo (TIPO)
-
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[1].atributos['tipo']
-
-        nodo_actual.nodos[0].atributos['tipo'] = nodo_actual.nodos[1].atributos['tipo']
-
-    def __visitar_expresión_matemática(self, nodo_actual):
+    def visitar_mientras(self, nodo : NodoMientras):
         """
-        ExpresiónMatemática ::= (Expresión) | Número | Identificador
+        Mientras ::= "mientras" Condición "inicia_mientras" Instruccion+ "final_mientras"
+        """
+        for n in nodo.instrucciones:
+            self.visitar(n)
 
-        Ojo esto soportaría un texto
+    def visitar_recibir_entrada(self, nodo: NodoRecibirEntrada):
+        """
+        Recibir_entrada ::= "recibir_entrada" ("con_comentario" (Booleano | Numero| Texto) | "sin_comentario" ) Guardar_en
+        Guardar_en ::= "guardar_en" Identificador
+        """
+
+        comentario = nodo.comentario
+        iden = nodo.identificadorObjetivo
+
+        if comentario is not None and iden is not None:
+            self.visitar_valor(comentario)
+            self.visitar_identificador(iden)
+
+            dec : NodoDeclaracionComun = self.tabla_símbolos.verificar_existencia(iden.identificador)
+
+            if dec.tipo != comentario.tipo:
+                raise Exception('El tipo de dato no coincide con el tipo de dato del identificador')
+
+    def visitar_si(self, nodo: NodoSi):
+        """
+        Si ::= "si" Condicion "inicio_si" Instruccion+ "final_si" (Sino)?
+        """
+        for n in nodo.instrucciones:
+            self.visitar(n)
+        
+        if nodo.sino is not None:
+            self.visitar_sino(nodo.sino)
+
+    def visitar_sino(self, nodo : NodoSino):
+        """
+        Sino ::= "sino" Instruccion+ "final_sino"
+        """
+        for n in nodo.instrucciones:
+            self.visitar(n)
+
+    def visitar_operando(self, nodo_actual : NodoOperando):
+        """
+        Programa::= (Declaracion | Expresion | Operandos | Funcion)*
         """
         for nodo in nodo_actual.nodos:
+            self.visitar(nodo)
 
-            # Verifico que exista si es un identificador (IDENTIFICACIÓN)
-            if nodo.tipo == TipoNodo.IDENTIFICADOR:
-                registro = self.tabla_símbolos.verificar_existencia(nodo.contenido)
+    def visitar_programa(self, nodo_actual : NodoPrograma):
+        """
+        Programa::= (Declaracion | Expresion | Operandos | Funcion)*
+        """
+        for nodo in nodo_actual.nodos:
+            self.visitar(nodo)
 
-            nodo.visitar(self)
+    def visitar_declaracion_comun(self, nodo_actual : NodoDeclaracionComun):
+        """
+        DeclaracionComun ::= Tipo Expresion
+        """
+        expresion = nodo_actual.expresion
 
-        # Anoto el tipo de datos 'NÚMERO' (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
+        self.tabla_símbolos.nuevo_registro(nodo_actual, expresion.identificador.identificador)
 
-    def __visitar_expresión(self, nodo_actual : NodoExpresion):
+        self.visitar_expresion(expresion)
+
+        if self.tabla_símbolos.existe_registro(expresion.identificador):
+            raise Exception('[Buho]: La variable ya existe: ', expresion.identificador)
+
+    def visitar_expresion(self, nodo_actual : NodoExpresion):
         """
         Expresion ::= Identificador "tiene" Operacion
         """
 
         # Verificamos que el identificador exista
-        self.__visitar_identificador(nodo_actual.identificador)
+        self.visitar_identificador(nodo_actual.identificador)
 
         # Verificamos que la operacion entre datos sea correcta
-        self.__visitar_operacion(nodo_actual.operacion)
+        self.visitar_operacion(nodo_actual.operacion)
 
         # Verificamos que el tipo de dato de la operacion
         # sea el mismo que el tipo de dato del identificador
         nombre_identificador = nodo_actual.identificador.identificador
 
-        nodo_iden : NodoDeclaracionComun = self.tabla_símbolos.verificar_existencia(nombre_identificador)
-        nodo_ope : NodoOperacion = nodo_actual.operacion
+        nodo_iden : NodoParametro | NodoIdentificador = self.tabla_símbolos.verificar_existencia(nombre_identificador)['referencia']
+        nodo_ope : NodoOperacionAritmetica | NodoOperacionLogica = nodo_actual.operacion
+        
+        tipo_primer = nodo_ope.operado.tipo
 
-        if nodo_iden.tipo != nodo_ope.primer_valor.tipo:
+        if tipo_primer == TipoDatos.IDENTIFICADOR:
+            var = nodo_ope.operado.valor.identificador
+            tipo_primer = self.tabla_símbolos.obtener_tipo(var)
+
+        if (tipo_primer == TipoDatos.LLAMADA):
+            var = nodo_ope.operado.valor.identificador.identificador
+            tipo_primer = self.tabla_símbolos.obtener_tipo(var)
+
+            # No sabemos el tipo de dato que regresa la función
+            # por la propia gramatica del lenguaje, asumiremos
+            # que funciona correctamente
+            if tipo_primer == "UNKNOWN":
+                return
+
+        # La variable se esta declarando en este punto
+        # por lo que no se puede verificar el tipo de dato
+        if nodo_iden.tipoNodo == TipoNodo.IDENTIFICADOR \
+            and not self.tabla_símbolos.existe_registro(nombre_identificador):
+            return
+
+        if nodo_iden.tipo != tipo_primer:
             raise Exception("El tipo de dato de la operacion no es el mismo que el tipo de dato del identificador")
 
-
-    def __visitar_operacion(self, nodo_actual : NodoOperacion):
+    def visitar_operacion(self, nodo_actual : NodoOperacionAritmetica | NodoOperacionLogica):
         """
         Operacion ::= Valor ( (OperadoresAritmeticos | OperadoresLogicos) Valor ) ?
         """
-        primer_valor = nodo_actual.primer_valor
-        segundo_valor = nodo_actual.segundo_valor
-        operacion = nodo_actual.operacion
+        primer_valor = nodo_actual.operado
+        segundo_valor = nodo_actual.operando
+        operacion = nodo_actual.operador
 
-        self.__visitar_valor(nodo_actual.primer_valor)
+        self.visitar_valor(primer_valor)
 
-        if nodo_actual.segundo_valor is not None:
-            self.__visitar_valor(nodo_actual.segundo_valor)
+        if segundo_valor is not None:
+            self.visitar_valor(segundo_valor)
 
-            if primer_valor.tipo != segundo_valor.tipo:
+            tipo_primer = primer_valor.tipo
+            tipo_segundo = segundo_valor.tipo
+
+            if tipo_primer == TipoDatos.IDENTIFICADOR:
+                tipo_primer = self.tabla_símbolos.obtener_tipo(primer_valor.valor.identificador)
+
+            if tipo_segundo == TipoDatos.IDENTIFICADOR:
+                tipo_segundo = self.tabla_símbolos.obtener_tipo(segundo_valor.valor.identificador)
+
+            if tipo_primer != tipo_segundo:
                 raise Exception("El tipo de dato de los dos valores no es el mismo")
+
+            es_numerico : bool = primer_valor.tipo == TipoDatos.NUMERO or primer_valor.tipo == TipoDatos.FLOTANTE
+            es_booleano : bool = primer_valor.tipo == TipoDatos.BOOLEANO
+            es_texto : bool = primer_valor.tipo == TipoDatos.TEXTO
 
             es_numerico : bool = primer_valor.tipo == TipoDatos.NUMERO or primer_valor.tipo == TipoDatos.FLOTANTE
             es_booleano : bool = primer_valor.tipo == TipoDatos.BOOLEANO
@@ -279,379 +323,64 @@ class Visitante:
             if es_texto and operacion.tipoNodo == TipoNodo.OPERACION_ARITMETICA:
                 raise Exception("No se puede realizar una operacion aritmetica con valores de texto")     
 
-    def __visitar_valor(self, nodo_actual : NodoValor):
+    def visitar_valor(self, nodo_actual : NodoArbol):
         """
         Valor ::= (Identificador | Numero | Flotante | Texto | Booleano | Aleatorio)
         """
         
         # Verificamos en caso de que sea un identificador
         tipos = {
-            TipoDatos.BOOLEANO : False,
-            TipoDatos.NUMERO : False,
-            TipoDatos.FLOTANTE : False,
-            TipoDatos.TEXTO : False
+            TipoNodo.NUMERO : False,
+            TipoNodo.FLOTANTE : False,
+            TipoNodo.TEXTO : False,
+            TipoNodo.BOOLEANO : False
         }
 
         # Verificamos que el identificador exista
-        es_identificador = nodo_actual.tipo not in tipos
+        es_identificador = nodo_actual.valor.tipoNodo not in tipos
 
         if es_identificador:
-            self.tabla_símbolos.verificar_existencia(nodo_actual.valor)
+            if nodo_actual.valor.tipoNodo == TipoNodo.IDENTIFICADOR:
+                iden : NodoIdentificador = nodo_actual.valor
 
-    def __visitar_función(self, nodo_actual):
+                self.tabla_símbolos.verificar_existencia(iden.identificador)
+            if nodo_actual.valor.tipoNodo == TipoNodo.LLAMADA:
+                iden : NodoLlamada = nodo_actual.valor
+
+                self.tabla_símbolos.verificar_existencia(iden.identificador.identificador)
+
+    def visitar_funcion(self, nodo_actual : NodoFuncion):
         """
-        Función ::= (Comentario)? mae Identificador (ParámetrosFunción) BloqueInstrucciones
+        Funcion ::= "funcion" Identificador Parametros? "inicio_funcion" (Instruccion+)? Devuelve "final_funcion"
         """
 
         # Meto la función en la tabla de símbolos (IDENTIFICACIÓN)
-        self.tabla_símbolos.nuevo_registro(nodo_actual)
+        nombre_func = nodo_actual.identificador.identificador
+        self.tabla_símbolos.nuevo_registro(nodo_actual, nombre_func)
 
         self.tabla_símbolos.abrir_bloque()
 
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
+        for parametro in nodo_actual.parametros:
+            self.visitar(parametro)
+
+        for nodo in nodo_actual.instrucciones:
+            self.visitar(nodo)
 
         self.tabla_símbolos.cerrar_bloque()
 
-        # Anoto el tipo de retorno (TIPO)
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[2].atributos['tipo']
-
-    def __visitar_invocación(self, nodo_actual):
+    def visitar_parametro(self, nodo_actual : NodoParametro):
         """
-        Invocación ::= Identificador ( ParámetrosInvocación )
+        Parametro ::= Tipo Identificador
         """
-
-        # Verfica que el 'Identificador' exista (IDENTIFICACIÓN) y que sea
-        registro = self.tabla_símbolos.verificar_existencia(nodo_actual.nodos[0].contenido)
-
-        if registro['referencia'].tipo != TipoNodo.FUNCIÓN:
-            raise Exception('Esa vara es una variable...', registro)
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # El tipo resultado de la invocación es el tipo inferido de una
-        # función previamente definida
-        nodo_actual.atributos['tipo'] = registro['referencia'].atributos['tipo']
-
-    def __visitar_parámetros_invocación(self, nodo_actual):
-        """
-        ParámetrosInvocación ::= Valor (/ Valor)+
-        """
-
-        # Recordemos que 'Valor' no existe en el árbol...
-
-        # Si es 'Identificador' verifico que exista (IDENTIFICACIÓN)
-        for nodo in nodo_actual.nodos:
-
-            # Si existe y no es función ya viene con el tipo por que
-            # fue producto de una asignación
-            if nodo.tipo == TipoNodo.IDENTIFICADOR:
-                registro = self.tabla_símbolos.verificar_existencia(nodo.contenido)
-
-            elif nodo.tipo == TipoNodo.FUNCIÓN:
-                raise Exception('Esa vara es una función...', nodo.contenido)
-
-                # Si es número o texto nada más los visito
-            nodo.visitar(self)
-
-        # No hay tipos en los parámetros... se sabe en tiempo de ejecución
-
-    def __visitar_parámetros_función(self, nodo_actual):
-        """
-        ParámetrosFunción ::= Identificador (/ Identificador)+
-        """
-
-        # Registro cada 'Identificador' en la tabla
-        for nodo in nodo_actual.nodos:
-            self.tabla_símbolos.nuevo_registro(nodo)
-            nodo.visitar(self)
-
-    def __visitar_instrucción(self, nodo_actual):
-        """
-        Instrucción ::= (Repetición | Bifurcación | (Asignación | Invocación) | Retorno | Error | Comentario )
-        """
-        # Por alguna razón no me volé este nivel.. así que lo visitamos...
-        # Esto es un desperdicio de memoria y de cpu
-
-        # Visita la instrucción
-
-        # Lo pongo así por copy/paste... pero puede ser como el comentario
-        # de más abajo.
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-            nodo_actual.atributos['tipo'] = nodo.atributos['tipo']
-
-        # nodo_actual.nodos[0].visitar(self)
-
-    def __visitar_repetición(self, nodo_actual):
-        """
-        Repetición ::= upee ( Condición ) BloqueInstrucciones
-        """
-        # Visita la condición
-
-        # Visita el bloque de instrucciones
-
-        # Lo pongo así por copy/paste... pero puede ser como el comentario
-        # de más abajo.
-        self.tabla_símbolos.abrir_bloque()
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # nodo_actual.nodos[0].visitar(self)
-
-        self.tabla_símbolos.cerrar_bloque()
-
-        # Anoto el tipo de retorno (TIPO)
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[1].atributos['tipo']
-
-    def __visitar_bifurcación(self, nodo_actual):
-        """
-        Bifurcación ::= DiaySi (Sino)?
-        """
-
-        # Visita los dos nodos en el siguiente nivel si los hay
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        nodo_actual.atributos['tipo'] = TipoDatos.CUALQUIERA
-
-    def __visitar_diaysi(self, nodo_actual):
-        """
-        DiaySi ::= diay siii ( Condición ) BloqueInstrucciones
-        """
-
-        # Visita la condición
-
-        # Visita el bloque de instrucciones
-
-        # Lo pongo así por copy/paste... pero puede ser como el comentario
-        # de más abajo.
-        self.tabla_símbolos.abrir_bloque()
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # nodo_actual.nodos[0].visitar(self)
-
-        self.tabla_símbolos.cerrar_bloque()
-
-        # Anoto el tipo de retorno (TIPO)
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[1].atributos['tipo']
-
-    def __visitar_sino(self, nodo_actual):
-        """
-        Sino ::= sino ni modo BloqueInstrucciones
-        """
-        # Visita el bloque de instrucciones
-
-        # Lo pongo así por copy/paste... pero puede ser como el comentario
-        # de más abajo.
-        self.tabla_símbolos.abrir_bloque()
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # nodo_actual.nodos[0].visitar(self)
-
-        self.tabla_símbolos.cerrar_bloque()
-
-        # Anoto el tipo de retorno (TIPO)
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[0].atributos['tipo']
-
-    def __visitar_condición(self, nodo_actual):
-        """
-        Condición ::= Comparación ((divorcio|casorio) Comparación)?
-        """
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # Comparación retorna un valor de verdad (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.VALOR_VERDAD
-
-    def __visitar_comparación(self, nodo_actual):
-        """
-        Comparación ::= Valor Comparador Valor
-        """
-
-        # Si los 'Valor' son identificadores se asegura que existan (IDENTIFICACIÓN)
-        for nodo in nodo_actual.nodos:
-            if nodo.tipo == TipoNodo.IDENTIFICADOR:
-                registro = self.tabla_símbolos.verificar_existencia(nodo.contenido)
-
-            nodo.visitar(self)
-
-        # Verifico que los tipos coincidan (TIPO)
-        valor_izq = nodo_actual.nodos[0]
-        comparador = nodo_actual.nodos[1]
-        valor_der = nodo_actual.nodos[2]
-        # Ya se que eso se ve sueltelefeo... pero ya el cerebro se me apagó...
-
-        if valor_izq.atributos['tipo'] == valor_der.atributos['tipo']:
-            comparador.atributos['tipo'] = valor_izq.atributos['tipo']
-
-            # Una comparación siempre tiene un valor de verdad
-            nodo_actual.atributos['tipo'] = TipoDatos.VALOR_VERDAD
-
-        # Caso especial loco: Si alguno de los dos es un identificador de
-        # un parámetro de función no puedo saber que tipo tiene o va a
-        # tener por que este lenguaje no es tipado... tons vamos a poner
-        # que la comparación puede ser cualquiera
-        elif valor_izq.atributos['tipo'] == TipoDatos.CUALQUIERA or \
-                valor_der.atributos['tipo'] == TipoDatos.CUALQUIERA:
-
-            comparador.atributos['tipo'] = TipoDatos.CUALQUIERA
-
-            # Todavía no estoy seguro.
-            nodo_actual.atributos['tipo'] = TipoDatos.CUALQUIERA
-
-        else:
-            raise Exception('Papo, algo tronó acá', str(nodo_actual))
-
-    def __visitar_retorno(self, nodo_actual):
-        """
-        Retorno :: sarpe (Valor)?
-        """
-
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        if nodo_actual.nodos == []:
-            # Si no retorna un valor no retorna un tipo específico
-            nodo_actual.atributos['tipo'] = TipoDatos.NINGUNO
-
-        else:
-
-            for nodo in nodo_actual.nodos:
-
-                nodo.visitar(self)
-
-                if nodo.tipo == TipoNodo.IDENTIFICADOR:
-                    # Verifico si valor es un identificador que exista (IDENTIFICACIÓN)
-                    registro = self.tabla_símbolos.verificar_existencia(nodo.contenido)
-
-                    # le doy al sarpe el tipo de retorno del identificador encontrado
-                    nodo_actual.atributos['tipo'] = registro['referencia'].atributos['tipo']
-
-                else:
-                    # Verifico si es un Literal de que tipo es (TIPO)
-                    nodo_actual.atributos['tipo'] = nodo.atributos['tipo']
-
-    def __visitar_error(self, nodo_actual):
-        """
-        Error ::= safis Valor
-        """
-        # Verifico si 'Valor' es un identificador que exista (IDENTIFICACIÓN)
-        for nodo in nodo_actual.nodos:
-            if nodo.tipo == TipoNodo.IDENTIFICADOR:
-                self.tabla_símbolos.verificar_existencia(nodo.contenido)
-
-        # Un safis imprime a stderr y sigue sin retornar nada
-        nodo_actual.atributos['tipo'] = TipoDatos.NINGUNO
-
-    def __visitar_principal(self, nodo_actual):
-        """
-        Principal ::= (Comentario)?  (jefe | jefa) mae BloqueInstrucciones
-        """
-        # Este mae solo va a tener un bloque de instrucciones que tengo que
-        # ir a visitar
-
-        # Lo pongo así por copy/paste... pero puede ser como el comentario
-        # de más abajo.
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # nodo_actual.nodos[0].visitar(self)
-
-        # Anoto el tipo de retorno (TIPO)
-        nodo_actual.atributos['tipo'] = nodo_actual.nodos[0].atributos['tipo']
-
-    def __visitar_literal(self, nodo_actual):
-        """
-        Literal ::= (Número | Texto | ValorVerdad)
-        """
-        # En realidad núnca se va a visitar por que lo saqué del árbol
-        # duránte la etapa de análisiss
-
-    def __visitar_número(self, nodo_actual):
-        """
-        Número ::= (Entero | Flotante)
-        """
-        # En realidad núnca se va a visitar por que lo saqué del árbol
-        # duránte la etapa de análisiss
-
-    def __visitar_bloque_instrucciones(self, nodo_actual):
-        """
-        BloqueInstrucciones ::= { Instrucción+ }
-        """
-        # Visita todas las instrucciones que contiene
-        for nodo in nodo_actual.nodos:
-            nodo.visitar(self)
-
-        # Acá yo debería agarrar el tipo de datos del Retorno si lo hay
-        nodo_actual.atributos['tipo'] = TipoDatos.NINGUNO
-
-        for nodo in nodo_actual.nodos:
-            if nodo.atributos['tipo'] != TipoDatos.NINGUNO:
-                nodo_actual.atributos['tipo'] = nodo.atributos['tipo']
-
-    def __visitar_operador(self, nodo_actual):
-        """
-        Operador ::= (hechele | quitele | chuncherequee | desmadeje)
-        """
-        # Operador para trabajar con números (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
-
-    def __visitar_valor_verdad(self, nodo_actual):
-        """
-        ValorVerdad ::= (True | False)
-        """
-        # Valor de verdad (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.VALOR_VERDAD
-
-    def __visitar_comparador(self, nodo_actual):
-        """
-        Comparador ::= (cañazo | poquitico | misma vara | otra vara | menos o igualitico | más o igualitico)
-        """
-        # Estos comparadores son numéricos  (TIPO)
-        # (cañazo | poquitico | misma vara | otra vara | menos o igualitico | más o igualitico)
-        if nodo_actual.contenido not in ['misma vara', 'otra vara']:
-            nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
-
-        else:
-            nodo_actual.atributos['tipo'] = TipoDatos.CUALQUIERA
-            # Si no es alguno de esos puede ser Numérico o texto y no lo puedo
-            # inferir todavía
-
-    def __visitar_texto(self, nodo_actual):
-        """
-        Texto ::= ~/\w(\s\w)*)?~
-        """
-        # Texto (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.TEXTO
-
-    def __visitar_entero(self, nodo_actual):
-        """
-        Entero ::= (-)?\d+
-        """
-        # Entero (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
-
-    def __visitar_flotante(self, nodo_actual):
-        """
-        Flotante ::= (-)?\d+.(-)?\d+
-        """
-        # Flotante (TIPO)
-        nodo_actual.atributos['tipo'] = TipoDatos.NÚMERO
-
-    def __visitar_identificador(self, nodo_actual):
+            
+        # Meto el parámetro en la tabla de símbolos (IDENTIFICACIÓN)
+        self.tabla_símbolos.nuevo_registro(nodo_actual, nodo_actual.identificador.identificador)
+
+    def visitar_identificador(self, nodo_actual : NodoIdentificador):
         """
         Identificador ::= [a-z][a-zA-Z0-9]+
         """
-        nodo_actual.atributos['tipo'] = TipoDatos.CUALQUIERA
-        # No hace nada
+        self.tabla_símbolos.verificar_existencia(nodo_actual.identificador)
 
 
 class Verificador:
@@ -660,11 +389,9 @@ class Verificador:
     tabla_símbolos: TablaSímbolos
 
     def __init__(self, nuevo_asa: Arbol):
-
         self.asa = nuevo_asa
 
         self.tabla_símbolos = TablaSímbolos()
-        self.__cargar_ambiente_estándar()
 
         self.visitador = Visitante(self.tabla_símbolos)
 
@@ -678,23 +405,11 @@ class Verificador:
         else:
             self.asa.imprimir_preorden()
 
-    def __cargar_ambiente_estándar(self):
-
-        funciones_estandar = [('hacer_menjunje', TipoDatos.NINGUNO),
-                              ('viene_bolita', TipoDatos.TEXTO),
-                              ('trome', TipoDatos.NÚMERO),
-                              ('sueltele', TipoDatos.NINGUNO),
-                              ('echandi_jiménez', TipoDatos.TEXTO)]
-
-        for nombre, tipo in funciones_estandar:
-            nodo = NodoÁrbol(TipoNodo.FUNCIÓN, contenido=nombre, atributos={'tipo': tipo})
-            self.tabla_símbolos.nuevo_registro(nodo)
-
     def verificar(self):
         self.visitador.visitar(self.asa.raiz)
 
 def invocar_verificador(contenido_archivo):
-    asa = invocar_analizador(contenido_archivo)
+    asa = invocar_analizador_para_verificador(contenido_archivo)
 
     verificador = Verificador(asa)
     verificador.verificar()
@@ -702,7 +417,7 @@ def invocar_verificador(contenido_archivo):
     verificador.imprimir_asa()
 
 def invocar_verificador_para_generador(contenido_archivo):
-    asa = invocar_analizador(contenido_archivo)
+    asa = invocar_analizador_para_verificador(contenido_archivo)
 
     verificador = Verificador(asa)
     verificador.verificar()

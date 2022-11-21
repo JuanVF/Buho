@@ -253,10 +253,12 @@ Clase de nodo para el manejo de identificadores
 """
 class NodoIdentificador(NodoArbol):
     identificador: str
+    tipo : str
 
-    def __init__(self, identificador=None, atributos=None):
+    def __init__(self, identificador=None, tipo=None, atributos=None):
         super().__init__(atributos)
         self.identificador = identificador
+        self.tipo = tipo
         self.tipoNodo = TipoNodo.IDENTIFICADOR
 
     def __str__(self):

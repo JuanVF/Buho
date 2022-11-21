@@ -5,7 +5,7 @@ from explorador.explorador import ComponenteLéxico, TipoComponente, Explorador
 from utils.arbolito import NodoDeclaracionComun, NodoDesde, NodoDevuelve, NodoDormir, NodoError, NodoExpresion, \
     NodoIdentificador, NodoOperacion, NodoNumero, NodoFlotante, NodoTexto, NodoAleatorio, NodoBooleano, NodoEscribir, \
     NodoRecibirEntrada, NodoSi, NodoSino, NodoMientras, NodoValorAbsoluto, Arbol, NodoFuncion, NodoParametro, \
-    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando
+    NodoOperacionAritmetica, NodoOperacionLogica, NodoPrograma, NodoLlamada, NodoCondicion, NodoOperando, NodoValor
 from utils.tipoDatos import TipoDatos
 from utils.operandosAritmeticos import OperandosAritmeticos
 from utils.operandosLogicos import OperandosLogicos
@@ -182,29 +182,48 @@ class Analizador:
         """
         Valor ::= (Identificador | Numero | Flotante | Texto | Booleano | Aleatorio)
         """
+
         tipo = self.componente_actual.tipo
 
         if tipo == TipoComponente.IDENTIFICADOR:
-            return self.__verificar_identificador()
+            iden = self.__verificar_identificador()
+
+            return NodoValor(TipoDatos.IDENTIFICADOR, iden)
 
         if tipo == TipoComponente.NUMERO:
-            return self.__verificar_numero()
+            num = self.__verificar_numero()
+
+            return NodoValor(TipoDatos.NUMERO, num)
 
         if tipo == TipoComponente.FLOTANTE:
-            return self.__verificar_flotante()
+            flot = self.__verificar_flotante()
+
+            return NodoValor(TipoDatos.FLOTANTE, flot)
 
         if tipo == TipoComponente.TEXTO:
-            return self.__verificar_texto()
+            text = self.__verificar_texto()
+
+            return NodoValor(TipoDatos.TEXTO, text)
 
         if tipo == TipoComponente.BOOLEANO:
-            return self.__verificar_booleano()
+            bool = self.__verificar_booleano()
+
+            return NodoValor(TipoDatos.BOOLEANO, bool)
 
         if tipo == TipoComponente.ALEATORIO:
-            return self.__analizar_aleatorio()
+            alea = self.__verificar_aleatorio()
+
+            return NodoValor(TipoDatos.FLOTANTE, alea)
+
         if tipo == TipoComponente.LLAMADA:
-            return self.__analizar_llamada()
+            llamada = self.__analizar_llamada()
+
+            return NodoValor(TipoDatos.LLAMADA, llamada)
+
         if tipo == TipoComponente.VALOR_ABSOLUTO:
-            return self.__analizar_ValorAbsoluto()
+            valor_absoluto = self.__analizar_valor_absoluto()
+
+            return NodoValor(TipoDatos.NUMERO, valor_absoluto)
 
         """
         Error Sintáctico
@@ -515,7 +534,7 @@ class Analizador:
 
     def __analizar_declaracion(self):
         """
-            DeclaracionComun ::= Tipo Expresion "\n"
+        DeclaracionComun ::= Tipo Expresion "\n"
         """
         tipo = self.__verificar_tipo_dato()
         expresion = self.__analizar_expresion()
